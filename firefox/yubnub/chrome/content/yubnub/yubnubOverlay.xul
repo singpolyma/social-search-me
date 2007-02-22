@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<overlay id="yubnubOverlay"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+// This imports our javascript.
+<script type="application/x-javascript" src="chrome://yubnub/content/yubnubOverlay.js"> </script>
+
+<textbox id="urlbar"
+         ontextentered="return YubNubGo(param);"
+         tooltiptext="Enter a URL or YubNub command"
+         onkeydown="return YubNubKey(event);"
+         />
+         
+<toolbarbutton id="go-button"
+               oncommand="YubNubGo(event);"
+               />
+
+</overlay>
