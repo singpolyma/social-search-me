@@ -1,4 +1,4 @@
-// FreshTags0.5-Singpolyma2
+﻿// FreshTags0.5-Singpolyma2
 // Tag-Driven Blog Navigation
 // www.greg-hill.id.au 2006
 // modifications by Stephen Paul Weber a.k.a. Singpolyma (singpolyma-tech.blogspot.com)
@@ -94,6 +94,7 @@ function freshtags_load(aid) {
 function freshtags_load_sub(id,allowexternal) {
    if(typeof(WidgetData['freshtags'][id]) != 'object') return;
    if(WidgetData['freshtags'][id]['type'] == 'tags') {
+      if(WidgetData['freshtags'][id]['source'] == 'local') WidgetData['freshtags'][id]['main_tags_loaded'](eval(WidgetData['freshtags'][id]['varname']));
       if(WidgetData['freshtags'][id]['source'] == 'del.icio.us') writeScript('http://del.icio.us/feeds/json/tags/'+WidgetData['freshtags'][id]['username']+'/'+WidgetData['freshtags'][id]['anchor']+'?sort=freq&count=100&callback=WidgetData[\'freshtags\'][\''+id+'\'][\'main_tags_loaded\']');
       if(WidgetData['freshtags'][id]['source'] == 'mediawiki') writeScript('http://singpolymaplay.ning.com/MediaWiki-categories.php?xn_auth=no&mainpage='+encodeURIComponent(WidgetData['freshtags'][id]['mainpage'])+'&callback=WidgetData[\'freshtags\'][\''+id+'\'][\'main_tags_loaded\']');
    } else if ((WidgetData['freshtags'][id]['type'] == 'posts' && (!WidgetData['freshtags'][id]['tag_list'] || allowexternal)) || (allowexternal && WidgetData['freshtags'][id]['type'] == 'external')) {
@@ -135,6 +136,7 @@ function main_tags_loaded(delicious_data,id) {
    if(WidgetData['freshtags'][id]['curr_tags']) {
       if(WidgetData['freshtags'][id]['source'] == 'del.icio.us') writeScript('http://del.icio.us/feeds/json/tags/'+WidgetData['freshtags'][id]['username']+'/'+WidgetData['freshtags'][id]['anchor']+'+'+WidgetData['freshtags'][id]['curr_tags']+'?count=100&sort=freq&callback=WidgetData[\'freshtags\'][\''+id+'\'][\'tags_loaded\']');
       if(WidgetData['freshtags'][id]['source'] == 'mediawiki') writeScript('http://singpolymaplay.ning.com/MediaWiki-categories.php?xn_auth=no&mainpage='+encodeURIComponent(WidgetData['freshtags'][id]['mainpage'])+'&tags='+encodeURIComponent(WidgetData['freshtags'][id]['curr_tags'].replace(/\+/,' '))+'&callback=WidgetData[\'freshtags\'][\''+id+'\'][\'tags_loaded\']');
+      if(WidgetData['freshtags'][id]['source'] == 'local') WidgetData['freshtags'][id]['tags_loaded'](eval(WidgetData['freshtags'][id]['varname']));
    } else
       WidgetData['freshtags'][id]['tags_loaded'](delicious_data);
 }//end function main_tags_loaded
@@ -193,17 +195,25 @@ function posts_loaded(delicious_data,id,onnull) {
 //converts the JSON returned by feed2json to JSON of the Delicious.posts type
 function feedjson2deljson(json_data) {
    var rtrn = [];
+   if(!json_data.items && json_data.feed && json_data.feed.entry) json_data.items = json_data.feed.entry;
+   if(!json_data.items) return [];
    for(var i=0; i<json_data.items.length; i++) {
+      if(typeof(json_data.items[i]) != 'object') continue;
       obj = {};
       obj.d = json_data.items[i].title;
+      if(obj.d['$t'])
+         obj.d = obj.d['$t'];
       obj.u = json_data.items[i].link;
+      if(typeof(obj.u) == 'object') obj.u = obj.u[0];
       if(obj.u.href)
-         ojb.u = obj.u.href;
+         obj.u = obj.u.href;
       obj.n = '';
       if(json_data.items[i].description)
          obj.n = json_data.items[i].description;
       if(json_data.items[i].content)
          obj.n = json_data.items[i].content;
+      if(obj.n['$t'])
+         obj.n = obj.n['$t'];
       rtrn.push(obj);
    }//end for
    return rtrn;
@@ -251,6 +261,14 @@ function process_source(id,feedoverride) {
       if(WidgetData['freshtags'][id]['tag_list'] && WidgetData['freshtags'][WidgetData['freshtags'][id]['tag_list']]['source'] == 'mediawiki' && !WidgetData['freshtags'][WidgetData['freshtags'][id]['tag_list']]['tags_modded']) {WidgetData['freshtags'][WidgetData['freshtags'][id]['tag_list']]['curr_tags'] = curr_tags; WidgetData['freshtags'][WidgetData['freshtags'][id]['tag_list']]['tags_modded'] = true; freshtags_load(WidgetData['freshtags'][id]['tag_list']);}
       writeScript('http://singpolymaplay.ning.com/MediaWiki-items.php?xn_auth=no&url='+encodeURIComponent(prefix + encodeURIComponent(curr_tags.replace(/\+/,'_').replace(/ +/,'_')))+'&callback=WidgetData[\'freshtags\'][\''+id+'\'][\'posts_loaded\']');
    }//end if source == mediawiki
+   if(!feedoverride && WidgetData['freshtags'][id]['source'] == 'blogger') {
+      WidgetData['freshtags'][id]['posts_loaded'] = eval('function(feed_data,onnull){posts_loaded(feedjson2deljson(feed_data),"'+id+'",onnull);}');
+      var url = WidgetData['freshtags'][id]['url'].split('/');
+      url = 'http://'+url[2]+'/';
+      if(curr_tags) curr_tags = '/-/' + curr_tags.replace(/[ \+]+/g,'/');
+      url += 'feeds/posts/default'+curr_tags+'?alt=json-in-script&callback=WidgetData.freshtags.'+id+'.posts_loaded';
+      writeScript(url);
+   }//end if source == blogger
    if(feedoverride || WidgetData['freshtags'][id]['source'] == 'feed') {
       WidgetData['freshtags'][id]['posts_loaded'] = eval('function(feed_data,onnull){posts_loaded(feedjson2deljson(feed_data),"'+id+'",onnull);}');
       var feedurl = WidgetData['freshtags'][id]['feedurl'];
@@ -261,7 +279,7 @@ function process_source(id,feedoverride) {
    WidgetData['freshtags'][id]['loaded'] = true;
 }//end function process_source
 
-//gets a DOM item based on an XPATH selector (borrowed from Johan Sundstr?m)
+//gets a DOM item based on an XPATH selector (borrowed from Johan Sundstrom)
 function xget( xpathSelector ) {
   if(typeof(document.evaluate) == 'undefined') {return '';}
   var it = document.evaluate( xpathSelector, document, null,
