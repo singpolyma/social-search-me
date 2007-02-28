@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: FreshTags
-Version: 0.11
+Version: 0.2
 Plugin URI: http://singpolyma-tech.blogspot.com/2006/03/freshtags-for-wordpress.html
-Description: Integrates FreshTags functionality into WordPress
+Description: Integrates FreshTags functionality into WordPress (works as a widget)
 Author: Stephen Paul Weber
-Author URI: http://singpolyma-tech.blogspot.com/
+Author URI: http://singpolyma.net
 */
 
 /*
@@ -246,7 +246,7 @@ http://www.gnu.org/copyleft/gpl.html
       global $wpdb;
       $catids = array();
       foreach($tags_array as $tag) {
-         $catid = $wpdb->get_results("SELECT cat_id FROM ".$wpdb->categories." WHERE cat_name='".$tag."'");
+         $catid = $wpdb->get_results("SELECT cat_id FROM ".$wpdb->categories." WHERE cat_name='".mysql_real_escape_string($tag)."'");
          $catids[] = $catid[0]->cat_id;
       }//end foreach tags
       $postids = array();
@@ -363,5 +363,58 @@ http://www.gnu.org/copyleft/gpl.html
       }//end if-else raw
    } else
       add_filter('post_link','freshtags_postlink_filter');
+      
+//### Begin Widget ###
+
+
+function widget_freshtags_init() {
+
+
+	if (!function_exists('register_sidebar_widget'))
+		return;
+	
+	
+	function widget_freshtags($args) {
+		extract($args);
+				
+		$options = get_option('widget_freshtags');
+		$title = $options['title'];
+
+		echo $before_widget;
+		echo $before_title . $title . $after_title;
+		echo freshtags_taglist($options['tags-format']);
+		$options['post-header'] = $options['post-header'] ? $before_title . $options['post-header'] . $after_title : '';
+      echo freshtags_postlist($options['max-items'],$options['post-header']);
+		
+		echo $after_widget;
+	}
+	
+	function widget_freshtags_control() {
+		$options = get_option('widget_freshtags');
+		if ( !is_array($options) )
+			$options = array('title'=>'FreshTags', 'tags-format'=>'list', 'max-items' => '10', 'post-header' => '');			
+		if ( $_POST['freshtags-submit'] ) {
+			$options['title'] = strip_tags(stripslashes($_POST['freshtags-title']));
+			$options['tags-format'] = strip_tags(stripslashes($_POST['freshtags-tags-format']));
+			$options['max-items'] = strip_tags(stripslashes($_POST['freshtags-max-items']));
+			$options['post-header'] = strip_tags(stripslashes($_POST['freshtags-post-header']));
+			update_option('widget_freshtags', $options);
+		}
+
+		$title = htmlspecialchars($options['title'], ENT_QUOTES);
+
+		echo '<p style="text-align:right;"><label for="freshtags-title">Title:</label><br /> <input style="width: 200px;" id="freshtags-title" name="freshtags-title" type="text" value="'.$title.'" /></p>';
+		echo '<p style="text-align:right;"><label for="freshtags-tags-format">Taglist Format:</label><br /> <select style="width: 200px;" id="freshtags-tags-format" name="freshtags-tags-format"><option value="list"'.($options['tags-format'] == 'list' ? 'selected="selected"' : '').'>List</option><option value="drop"'.($options['tags-format'] == 'drop' ? 'selected="selected"' : '').'>Drop-down</option></select></p>';
+		echo '<p style="text-align:right;"><label for="freshtags-max-items">Max Posts Displayed:</label><br /> <input style="width: 200px;" id="freshtags-max-items" name="freshtags-max-items" type="text" value="'.$options['max-items'].'" /></p>';		
+		echo '<p style="text-align:right;"><label for="freshtags-post-header">Postlist Header Text:</label><br /> <input style="width: 200px;" id="freshtags-post-header" name="freshtags-post-header" type="text" value="'.$options['post-header'].'" /><br /><small>"%tags%" will be replaced by the detected tags</small></p>';				
+		echo '<input type="hidden" id="freshtags-submit" name="freshtags-submit" value="1" />';
+	}
+	
+			
+	register_sidebar_widget('FreshTags', 'widget_freshtags');
+	register_widget_control('FreshTags', 'widget_freshtags_control', 250, 300);
+}
+
+add_action('plugins_loaded', 'widget_freshtags_init');
 
 ?>
