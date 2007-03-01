@@ -115,7 +115,7 @@ function YubNubGo(param) {
       cmdstr = cmdstr[1];
       isyubnub = true;
    }//end if match y:
-   if(!isyubnub && (cmdstr.match(/^[^ ]+\.[a-z]{1,4}(\/[^ ]*)?$/m) || cmdstr.match(/^about:.*$/m) || cmdstr.match(/^javascript:.*$/m) || cmdstr.match(/^http:.*$/m) || cmdstr.match(/^ftp[:\.].*$/m) || cmdstr.match(/^file[:\.].*$/m) || cmdstr.match(/^\d\d?\d?.\d\d?\d?.\d\d?\d?.\d\d?\d?$/m)))
+   if(!isyubnub && (cmdstr.match(/^[^ ]+\.[a-z]{1,4}(:[\d]+)?(\/[^ ]*)?$/m) || cmdstr.match(/^about:.*$/m) || cmdstr.match(/^javascript:.*$/m) || cmdstr.match(/^http:.*$/m) || cmdstr.match(/^ftp[:\.].*$/m) || cmdstr.match(/^file[:\.].*$/m) || cmdstr.match(/^\d\d?\d?.\d\d?\d?.\d\d?\d?.\d\d?\d?$/m)))
       return handleURLBarCommand(param);
    else
       YubNubGOTO('http://yubnub.org/parser/parse?sourceid=Mozilla-search&command='+encodeURIComponent(cmdstr));

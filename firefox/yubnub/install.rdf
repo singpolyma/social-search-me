@@ -7,7 +7,7 @@ xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 
 		<em:id>{3120A7EC-D068-11DA-9B41-B622A1EF5492}</em:id>
 		<em:name>YubNub LocationBar</em:name>
-		<em:version>0.17</em:version>
+		<em:version>0.19</em:version>
 		<em:description>Adds YubNub support to locationbar</em:description>
 		<em:creator>Stephen Paul Weber</em:creator>
 		<em:homepageURL>http://singpolyma-tech.blogspot.com/</em:homepageURL>

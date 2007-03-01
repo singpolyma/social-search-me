@@ -6,7 +6,7 @@ var XpiInstaller = {
 	// --- Editable items begin ---
 	extFullName: 'YubNub LocationBar', // The name displayed to the user (don't include the version)
 	extShortName: 'yubnub', // The leafname of the JAR file (without the .jar part)
-	extVersion: '0.18',
+	extVersion: '0.19',
 	extAuthor: 'Stephen Paul Weber',
 	extLocaleNames: null, // e.g. ['en-US', 'en-GB']
 	extSkinNames: null, // e.g. ['classic', 'modern']
