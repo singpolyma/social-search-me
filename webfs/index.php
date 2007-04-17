@@ -42,8 +42,11 @@ $location = '/'.implode('/',$path);
 
 if(!$user) {
    if($format == 'html') {
+      echo '<html><head><title>WebFS</title>';
+      echo '<meta http-equiv="X-YADIS-Location" content="http://webfs.singpolyma.net/xrds" /></head><body>';
       echo '<ul><li><a href="/singpolyma/">singpolyma</a></li></ul>';
       echo '<a href="/api/">See API</a>';
+      echo '</body></html>';
    } else {
       header('Content-type: application/xml;');
       header('X-Moz-Is-Feed: 1');
@@ -77,6 +80,8 @@ if(substr($location,-1,1) == '/') {
 
 if($format == 'html') {
 
+echo '<html><head><title>WebFS</title>';
+echo '<meta http-equiv="X-YADIS-Location" content="http://webfs.singpolyma.net/xrds" /></head><body>';
 echo '<ul>'."\n";
 foreach($fs->ls() as $inode) {
    echo '   <li><a href="/'.urlencode($user).str_replace('+','%20',str_replace('%2F','/',urlencode($inode['dc:identifier']))).'">'.htmlentities($inode['title']).'</a> - '.$inode['inode'].'<br />';
@@ -93,6 +98,8 @@ unset($scrpath[0]);unset($scrpath[1]);unset($scrpath[2]);
 $scrpath = implode('/',$scrpath);
 $scrpath = 'http://webfs.singpolyma.net/api/'.$scrpath;
 echo '<a href="'.htmlentities($scrpath).'">See API</a>';
+
+echo '</body></html>';
 
 } else {
 
