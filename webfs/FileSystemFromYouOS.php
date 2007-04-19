@@ -29,7 +29,7 @@ class FileSystemFromYouOS extends FileSystem {
 
    protected $authkey;
 
-   public function __construct($username,$password) {
+   public function __construct($username,$password,$root='') {
       $authxml = $this->url_get('https://www.youos.com/api?apiname=login&username='.urlencode($username).'&password='.urlencode($password));
       $theParser = xml_parser_create();
       xml_parse_into_struct($theParser,$authxml,$authvals);
@@ -38,29 +38,48 @@ class FileSystemFromYouOS extends FileSystem {
          if($el['tag'] == 'LOGIN') {$this->authkey = $el['attributes']['TOKEN'];}
       }//end foreach authvals as el
       if(!$this->authkey) die('Login failed');
-      $this->root = '/'.$username.'/youfs/';
+      $this->root = $root ? '/'.$username.'/youfs'.$root : '/'.$username.'/youfs/';
       $this->cd('/');
    }//end constructor
 
-   public function wget($file) {//get contents and attributes of $file
+   public function wget($file,$head=false) {//get contents and attributes of $file
       $directory = explode('/',$file);
       $file = array_pop($directory);
       $directory = implode('/',$directory).'/';
-      if($directory{0} == '/')
-         $fromdir = substr($this->root,0,strlen($this->root)-1);
-      else
-         $fromdir = substr($this->root,0,strlen($this->currentDirectoryPath)-1);
-      $file = $fromdir.$directory.$file;
-      if($this->currentDirectoryPath != $fromdir.$directory) {
-         $oldcd = $this->currentDirectoryPath;
-         $this->cd($fromdir.$directory);
-      }//end if cd
-      $inodes = $this->ls();
-      $inode = $inodes[$file];
-      if(!$inode['content']) $inode['content'] = $this->url_get('https://www.youos.com/api?apiname=fs_download&path='.str_replace('+','%20',urlencode($file)).'&est='.urlencode($this->authkey));
-      if($oldcd) $this->cd($oldcd);
+      $fromdir = $this->root;
+      $tmp = $this->url_get('https://www.youos.com/api?apiname=fs_download&path='.str_replace('+','%20',urlencode($fromdir.$directory.$file)).'&est='.urlencode($this->authkey), true);
+      $inode = array();
+      $inode['mime'] = explode(';',$tmp['headers']['content-type']);
+      $inode['mime'] = $inode['mime'][0];
+      $inode['title'] = explode('=',$tmp['headers']['content-disposition']);
+      $inode['title'] = $inode['title'][1];
+      if(!$inode['title']) $inode['title'] = $file;
+      $inode['content'] = $tmp['body'];
       return $inode;
    }//end public function wget
+
+   public function stat($file) {//get attributes of $file (which may be a directory)
+      if($file == '/') $file = '';
+      $directoryxml = $this->url_get('https://www.youos.com/api?apiname=fs_stat&path='.urlencode($this->root.$file).'&est='.urlencode($this->authkey));
+      $theParser = xml_parser_create();
+      xml_parse_into_struct($theParser,$directoryxml,$directoryvals);
+      xml_parser_free($theParser);
+      foreach($directoryvals as $el) {
+         if($el['tag'] == 'STAT') {
+            $newitem = array();
+            $newitem['title'] = $el['attributes']['FILENAME'];
+            $newitem['dc:identifier'] = str_replace(substr($this->root,0,strlen($this->root)-1),'',$el['attributes']['PATH']);
+            if($newitem['dc:identifier'] == $directory) continue;
+            $newitem['dc:created'] = $this->youosdate($el['attributes']['LAST_UPDATED_DATE']);
+            $newitem['dc:modified'] = $this->youosdate($el['attributes']['LAST_UPDATED_DATE']);
+            if($el['attributes']['MIMETYPE'] && $el['attributes']['MIMETYPE'] != 'None') $newitem['mime'] = $el['attributes']['MIMETYPE'];
+            if(strtoupper($el['attributes']['ISDIR']) == 'TRUE') $newitem['mime'] = 'inode/directory';
+            $newitem['mime'] = $newitem['mime'] ? $newitem['mime'] : 'inode/file';
+            if($el['attributes']['SIZE'] && $el['attributes']['SIZE'] != 'None') $newitem['size'] = $el['attributes']['SIZE'];
+            return $newitem;
+         }//end if FSITEM
+      }//end foreach
+   }//end public function iget
 
    protected function youosdate($date) {
       $thedate = substr($date,0,10);
@@ -72,11 +91,9 @@ class FileSystemFromYouOS extends FileSystem {
    }//end protected function youosdate
 
    public function cd($directory) {
+      if($directory == '/') $directory = '';
       $this->currentDirectory = array();
-      if($directory{0} == '/')
-         $fromdir = substr($this->root,0,strlen($this->root)-1);
-      else
-         $fromdir = substr($this->root,0,strlen($this->currentDirectoryPath)-1);
+      $fromdir = $this->root;
       $this->currentDirectoryPath = $fromdir.$directory;
       $directoryxml = $this->url_get('https://www.youos.com/api?apiname=fs_ls&path='.urlencode($this->currentDirectoryPath).'&est='.urlencode($this->authkey));
       $theParser = xml_parser_create();
@@ -90,11 +107,11 @@ class FileSystemFromYouOS extends FileSystem {
             if($newitem['dc:identifier'] == $directory) continue;
             $newitem['dc:created'] = $this->youosdate($el['attributes']['LAST_UPDATED_DATE']);
             $newitem['dc:modified'] = $this->youosdate($el['attributes']['LAST_UPDATED_DATE']);
-//Name for attribute and contents are unstable.  file should be the corrent name.  directory may become dir or similar.  May all end up in mime as inode/file or inode/dir.  Needs research.
-            $newitem['inode'] = (strtoupper($el['attributes']['ISDIR']) == 'TRUE') ? 'directory' : 'file';
             if($el['attributes']['MIMETYPE'] && $el['attributes']['MIMETYPE'] != 'None') $newitem['mime'] = $el['attributes']['MIMETYPE'];
+            if(strtoupper($el['attributes']['ISDIR']) == 'TRUE') $newitem['mime'] = 'inode/directory';
+            $newitem['mime'] = $newitem['mime'] ? $newitem['mime'] : 'inode/file';
             if($el['attributes']['SIZE'] && $el['attributes']['SIZE'] != 'None') $newitem['size'] = $el['attributes']['SIZE'];
-            $this->currentDirectory[$newitem['dc:identifier']] = $newitem;
+            if($newitem['dc:identifier'] != '/'.$directory && !($newitem['dc:identifier'] == '/' && !$directory)) $this->currentDirectory[$newitem['dc:identifier']] = $newitem;
          }//end if FSITEM
       }//end foreach $directoryvals as el
    }//end function cd
