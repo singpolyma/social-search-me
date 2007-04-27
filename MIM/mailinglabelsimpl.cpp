@@ -7,12 +7,16 @@ void MailingLabelsImpl::doPaint(QPainter *painter, QPrinter *printer,int x, int 
 
    int totalCount = 0;//total records printed
    QSqlRecord loopRecord;
+   QString lastNameThing;
+   QString titleThing;
 
    while(totalCount < addressTable->rowCount()) {
 
       for(int i = 0; i < 10 && totalCount < addressTable->rowCount(); i++) {//first column
          loopRecord = addressTable->record(totalCount);
-         painter->drawText(x + 4, y + 32 + (97 * i), 250, 94, Qt::AlignVCenter | Qt::AlignHCenter | Qt::TextWordWrap, loopRecord.value("lastName").toString() + ", " + loopRecord.value("firstName").toString() + "\n" + loopRecord.value("streetAddress").toString() + "\n" + loopRecord.value("city").toString() + ", " + loopRecord.value("province").toString() + "\n" + loopRecord.value("postalCode").toString() + "\n" + loopRecord.value("country").toString());
+         lastNameThing = loopRecord.value("lastName").toString() == "" ? "" : loopRecord.value("lastName").toString() + ", ";
+         titleThing = loopRecord.value("title").toString() == "" ? "" : loopRecord.value("title").toString() + " ";
+         painter->drawText(x + 4, y + 32 + (97 * i), 250, 94, Qt::AlignVCenter | Qt::AlignHCenter | Qt::TextWordWrap, lastNameThing + titleThing + loopRecord.value("firstName").toString() + "\n" + loopRecord.value("streetAddress").toString() + "\n" + loopRecord.value("city").toString() + ", " + loopRecord.value("province").toString() + "\n" + loopRecord.value("postalCode").toString() + "\n" + loopRecord.value("country").toString());
          totalCount++;
       }//end for i < 10 (first column)
  
@@ -20,7 +24,9 @@ void MailingLabelsImpl::doPaint(QPainter *painter, QPrinter *printer,int x, int 
 
       for(int i = 0; i < 10 && totalCount < addressTable->rowCount(); i++) {//second column
          loopRecord = addressTable->record(totalCount);
-         painter->drawText(x + (4 + 263), y + 32 + (97 * i), 250, 94, Qt::AlignVCenter | Qt::AlignHCenter | Qt::TextWordWrap, loopRecord.value("lastName").toString() + ", " + loopRecord.value("firstName").toString() + "\n" + loopRecord.value("streetAddress").toString() + "\n" + loopRecord.value("city").toString() + ", " + loopRecord.value("province").toString() + "\n" + loopRecord.value("postalCode").toString() + "\n" + loopRecord.value("country").toString());
+         lastNameThing = loopRecord.value("lastName").toString() == "" ? "" : loopRecord.value("lastName").toString() + ", ";
+         titleThing = loopRecord.value("title").toString() == "" ? "" : loopRecord.value("title").toString() + " ";
+         painter->drawText(x + (4 + 263), y + 32 + (97 * i), 250, 94, Qt::AlignVCenter | Qt::AlignHCenter | Qt::TextWordWrap, lastNameThing + titleThing + loopRecord.value("firstName").toString() + "\n" + loopRecord.value("streetAddress").toString() + "\n" + loopRecord.value("city").toString() + ", " + loopRecord.value("province").toString() + "\n" + loopRecord.value("postalCode").toString() + "\n" + loopRecord.value("country").toString());
          totalCount++;
       }//end for i < 10 (second column)
 
@@ -28,7 +34,9 @@ void MailingLabelsImpl::doPaint(QPainter *painter, QPrinter *printer,int x, int 
 
       for(int i = 0; i < 10 && totalCount < addressTable->rowCount(); i++) {//second column
          loopRecord = addressTable->record(totalCount);
-         painter->drawText(x + (4 + (263*2)), y + 32 + (97 * i), 250, 94, Qt::AlignVCenter | Qt::AlignHCenter | Qt::TextWordWrap, loopRecord.value("lastName").toString() + ", " + loopRecord.value("firstName").toString() + "\n" + loopRecord.value("streetAddress").toString() + "\n" + loopRecord.value("city").toString() + ", " + loopRecord.value("province").toString() + "\n" + loopRecord.value("postalCode").toString() + "\n" + loopRecord.value("country").toString());
+         lastNameThing = loopRecord.value("lastName").toString() == "" ? "" : loopRecord.value("lastName").toString() + ", ";
+         titleThing = loopRecord.value("title").toString() == "" ? "" : loopRecord.value("title").toString() + " ";
+         painter->drawText(x + (4 + (263*2)), y + 32 + (97 * i), 250, 94, Qt::AlignVCenter | Qt::AlignHCenter | Qt::TextWordWrap, lastNameThing + titleThing + loopRecord.value("firstName").toString() + "\n" + loopRecord.value("streetAddress").toString() + "\n" + loopRecord.value("city").toString() + ", " + loopRecord.value("province").toString() + "\n" + loopRecord.value("postalCode").toString() + "\n" + loopRecord.value("country").toString());
          totalCount++;
       }//end for i < 10 (second column)
 

@@ -44,9 +44,9 @@ public:
 	  
 	  /* DATABASE SETUP */
 QSqlQuery query;
-query.exec("CREATE TABLE Addresses (id INTEGER PRIMARY KEY, title VARCHAR(5), firstName VARCHAR(20), lastName VARCHAR(20), streetAddress VARCHAR(50), city VARCHAR(20), province VARCHAR(20), postalCode VARCHAR(10), country VARCHAR(20), spouseName VARCHAR(20), homePhone VARCHAR(11), workPhone VARCHAR(11), workExtension VARCHAR(3), fax VARCHAR(11), cellPhone VARCHAR(11), email VARCHAR(50), url VARCHAR(255), birthdate DATE, anniversary DATE, notes TEXT, support INTEGER, currency VARCHAR(3), period INTEGER)");
+query.exec("CREATE TABLE Addresses (id INTEGER PRIMARY KEY, title VARCHAR(5), firstName VARCHAR(20), lastName VARCHAR(20), streetAddress VARCHAR(50), city VARCHAR(20), province VARCHAR(20), postalCode VARCHAR(10), country VARCHAR(20), spouseName VARCHAR(20), homePhone VARCHAR(11), workPhone VARCHAR(11), workExtension VARCHAR(3), fax VARCHAR(11), cellPhone VARCHAR(11), email VARCHAR(50), url VARCHAR(255), birthdate DATE, anniversary DATE, notes TEXT, support INTEGER, currency VARCHAR(3), period INTEGER, isBusiness INTEGER)");
 for(int i = 0; i < 32; i++)
-query.exec("INSERT INTO Addresses values(null, 'Mr.', 'Danny " + (new QVariant(i))->toString() + "', 'Young', '380 Louisa St.', 'Wako', 'BC', 'H2H 6J7', 'Canada', '', '', '', '', '', '', 'dude@place.net', 'http://example.com/', '', '', '', 1, 'CDN', 12)");
+query.exec("INSERT INTO Addresses values(null, 'Mr.', 'Danny " + (new QVariant(i))->toString() + "', 'Young', '380 Louisa St.', 'Wako', 'BC', 'H2H 6J7', 'Canada', '', '', '', '', '', '', 'dude@place.net', 'http://example.com/', '', '', '', 1, 'CDN', 12, 0)");
 query.exec("CREATE TABLE Currencies (id INTEGER PRIMARY KEY, symbol VARCHAR(3), value INTEGER)");
 query.exec("INSERT INTO Currencies values(null, 'CDN', 1)");
 query.exec("INSERT INTO Currencies values(null, 'USD', 1.3)");

@@ -13,6 +13,7 @@
 #include <QRegExp>
 #include <QDesktopWidget>
 #include <QtSql>
+#include <QtDebug>
 
 class DatabaseWindow : public QMainWindow
 {
@@ -68,7 +69,7 @@ protected:
    QSqlTableModel *_table;
    QSqlRecord currentRecord;
    QList<QObject *> *readOnlyBoxes;
-
+   virtual void closeEvent(QCloseEvent *event);
    virtual void _init();
 
 };

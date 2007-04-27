@@ -32,15 +32,18 @@ public:
 	  
       connect(supportBox, SIGNAL(editingFinished()), this, SLOT(calculateSupport()));
       connect(periodBox, SIGNAL(editingFinished()), this, SLOT(calculateSupport()));
-      connect(currencyBox, SIGNAL(currentIndexChanged()), this, SLOT(calculateSupport(int)));
+      connect(currencyBox, SIGNAL(currentIndexChanged(int)), this, SLOT(calculateSupport(int)));
+      connect(isBusinessBox, SIGNAL(stateChanged(int)), this, SLOT(businessToggle(int)));
 
    }//end constructor
 
 public slots:
    virtual void refresh(bool newRecord);
    virtual void refresh();
+   virtual bool lock(bool state, QList<QObject *> *get);
    virtual void calculateSupport();
    virtual void calculateSupport(int i);
+   virtual void businessToggle(int state);
 
 };
 

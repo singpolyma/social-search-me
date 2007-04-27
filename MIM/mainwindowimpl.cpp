@@ -47,5 +47,5 @@ void MainWindowImpl::showMailingLabels() {
 }//end printTest
 
 void MainWindowImpl::about() {
-   QMessageBox::about(this, "About MIM", "MIM BETA 2.0");
+   QMessageBox::about(this, "About MIM", "Work in progress. Moving from MSAccess to Qt.\nWill be released as 2.0 BETA.\nhttp://mim.4x2.net/ -- Project Website\nmimproj@gmail.com -- Project email (not checked regularly)\nmim@singpolyma.net -- lead developer email");
 }//end about
