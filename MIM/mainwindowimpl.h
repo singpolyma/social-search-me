@@ -1,3 +1,25 @@
+/*
+
+LICENSE
+
+
+This program is free software; you can redistribute it 
+and/or modify it under the terms of the GNU General Public 
+License (GPL) as published by the Free Software Foundation; 
+either version 2 of the License, or (at your option) any 
+later version.
+
+This program is distributed in the hope that it will be 
+useful, but WITHOUT ANY WARRANTY; without even the 
+implied warranty of MERCHANTABILITY or FITNESS FOR A 
+PARTICULAR PURPOSE.  See the GNU General Public License 
+for more details.
+
+To read the license please visit
+http://www.gnu.org/copyleft/gpl.html
+
+*/
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -37,7 +59,7 @@ public:
       db = QSqlDatabase::addDatabase("QSQLITE");//open database
       db.setDatabaseName(":memory:");
       if (!db.open()) {
-          //SQL Driver not found
+          qFatal("SQL Driver not found");
           qApp->exit(1);
       }//end if ! db.open
 
@@ -46,10 +68,16 @@ public:
 QSqlQuery query;
 query.exec("CREATE TABLE Addresses (id INTEGER PRIMARY KEY, title VARCHAR(5), firstName VARCHAR(20), lastName VARCHAR(20), streetAddress VARCHAR(50), city VARCHAR(20), province VARCHAR(20), postalCode VARCHAR(10), country VARCHAR(20), spouseName VARCHAR(20), homePhone VARCHAR(11), workPhone VARCHAR(11), workExtension VARCHAR(3), fax VARCHAR(11), cellPhone VARCHAR(11), email VARCHAR(50), url VARCHAR(255), birthdate DATE, anniversary DATE, notes TEXT, support INTEGER, currency VARCHAR(3), period INTEGER, isBusiness INTEGER)");
 for(int i = 0; i < 32; i++)
-query.exec("INSERT INTO Addresses values(null, 'Mr.', 'Danny " + (new QVariant(i))->toString() + "', 'Young', '380 Louisa St.', 'Wako', 'BC', 'H2H 6J7', 'Canada', '', '', '', '', '', '', 'dude@place.net', 'http://example.com/', '', '', '', 1, 'CDN', 12, 0)");
-query.exec("CREATE TABLE Currencies (id INTEGER PRIMARY KEY, symbol VARCHAR(3), value INTEGER)");
+   query.exec("INSERT INTO Addresses values(null, 'Mr.', 'Danny " + (new QVariant(i))->toString() + "', 'Young', '380 Louisa St.', 'Wako', 'BC', 'H2H 6J7', 'Canada', '', '', '', '', '', '', 'dude@place.net', 'http://example.com/', '', '', '', 1, 'CDN', 12, 0)");
+//currencies
+//WARNING - SYMBOL IS USED AS PRIMARY KEY IN PROGRAM (IE, SYMBOL IS STORED IN ADDRESSES TABLE)
+query.exec("CREATE TABLE Currencies (id INTEGER PRIMARY KEY, symbol CHAR(3), value INTEGER)");
 query.exec("INSERT INTO Currencies values(null, 'CDN', 1)");
 query.exec("INSERT INTO Currencies values(null, 'USD', 1.3)");
+//tags
+query.exec("CREATE TABLE Addresses2Categories (id INTEGER PRIMARY KEY, category VARCHAR(20), address_id INTEGER)");
+query.exec("INSERT INTO Addresses2Categories values(null, 'financial supporter', 1)");
+query.exec("INSERT INTO Addresses2Categories values(null, 'newsletter', 2)");
 
       addressTable = new QSqlTableModel();
       addressTable->setTable("Addresses");

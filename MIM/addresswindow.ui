@@ -5,12 +5,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>483</width>
-    <height>287</height>
+    <width>484</width>
+    <height>289</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Addresses</string>
+  </property>
+  <property name="windowIcon" >
+   <iconset resource="resources/MIM.qrc" >:/icons/MIM.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget" >
    <widget class="QTabWidget" name="tabWidget" >
@@ -24,9 +27,6 @@
     </property>
     <property name="tabPosition" >
      <enum>QTabWidget::South</enum>
-    </property>
-    <property name="tabShape" >
-     <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex" >
      <number>0</number>
@@ -593,6 +593,97 @@
        </item>
       </layout>
      </widget>
+     <widget class="QListView" name="categoryList" >
+      <property name="geometry" >
+       <rect>
+        <x>260</x>
+        <y>110</y>
+        <width>211</width>
+        <height>70</height>
+       </rect>
+      </property>
+      <property name="toolTip" >
+       <string>Categories</string>
+      </property>
+      <property name="statusTip" >
+       <string>Categories</string>
+      </property>
+      <property name="horizontalScrollBarPolicy" >
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="editTriggers" >
+       <set>QAbstractItemView::DoubleClicked</set>
+      </property>
+      <property name="uniformItemSizes" >
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="newCategoryCombo" >
+      <property name="geometry" >
+       <rect>
+        <x>260</x>
+        <y>182</y>
+        <width>160</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="toolTip" >
+       <string>Add a category</string>
+      </property>
+      <property name="statusTip" >
+       <string>Add a category</string>
+      </property>
+      <property name="editable" >
+       <bool>true</bool>
+      </property>
+      <property name="insertPolicy" >
+       <enum>QComboBox::NoInsert</enum>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="addCategoryButton" >
+      <property name="geometry" >
+       <rect>
+        <x>422</x>
+        <y>183</y>
+        <width>20</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip" >
+       <string>Add Category</string>
+      </property>
+      <property name="statusTip" >
+       <string>Add Category</string>
+      </property>
+      <property name="text" >
+       <string/>
+      </property>
+      <property name="icon" >
+       <iconset resource="resources/MIM.qrc" >:/icons/add.png</iconset>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="deleteCategoryButton" >
+      <property name="geometry" >
+       <rect>
+        <x>451</x>
+        <y>183</y>
+        <width>20</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip" >
+       <string>Delete Category</string>
+      </property>
+      <property name="statusTip" >
+       <string>Delete Category</string>
+      </property>
+      <property name="text" >
+       <string/>
+      </property>
+      <property name="icon" >
+       <iconset resource="resources/MIM.qrc" >:/icons/delete.png</iconset>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>
@@ -627,6 +718,8 @@
   <tabstop>cellPhoneBox</tabstop>
   <tabstop>tabWidget</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="resources/MIM.qrc" />
+ </resources>
  <connections/>
 </ui>

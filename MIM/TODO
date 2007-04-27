@@ -1,5 +1,6 @@
-Categories
 multiple im field
 spouse stuff
 child stuff
 alternate addresses with swap
+importers - duplicate detection (based on fn), update, backsynch, merge, duplicate
+Store data in file

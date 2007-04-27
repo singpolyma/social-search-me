@@ -1,6 +1,26 @@
-#include "databasewindow.h"
+/*
 
-#include <QMessageBox>
+LICENSE
+
+
+This program is free software; you can redistribute it 
+and/or modify it under the terms of the GNU General Public 
+License (GPL) as published by the Free Software Foundation; 
+either version 2 of the License, or (at your option) any 
+later version.
+
+This program is distributed in the hope that it will be 
+useful, but WITHOUT ANY WARRANTY; without even the 
+implied warranty of MERCHANTABILITY or FITNESS FOR A 
+PARTICULAR PURPOSE.  See the GNU General Public License 
+for more details.
+
+To read the license please visit
+http://www.gnu.org/copyleft/gpl.html
+
+*/
+
+#include "databasewindow.h"
 
 void DatabaseWindow::_init() {
    qDebug("DatabaseWindow::_init");
@@ -75,6 +95,16 @@ void DatabaseWindow::refresh() {
 void DatabaseWindow::newRecord() {
    refresh(true);
 }//end newRecord
+
+void DatabaseWindow::deleteRecord() {
+   qDebug("DatabaseWindow::deleteRecord");
+   if(getCurrentRecordNumber() < 0) return;
+   if(getTable()->removeRow(getCurrentRecordNumber())) {
+      getTable()->submitAll();
+      qDebug("Record Deleted");
+      refresh();
+   }//end if removeRow
+}//end deleteRecord
 
 void DatabaseWindow::saveRecord() {
    qDebug("DatabaseWindow::saveRecord");
@@ -165,6 +195,10 @@ void DatabaseWindow::saveRecord() {
    qDebug("Record saved");
 }//end saveRecord
 
+void DatabaseWindow::lastRecord() {
+   gotoRecord(-1);
+}//end lastRecord
+
 void DatabaseWindow::nextRecord() {
    gotoRecord(getCurrentRecordNumber() + 1);
 }//end nextRecord
@@ -172,6 +206,10 @@ void DatabaseWindow::nextRecord() {
 void DatabaseWindow::previousRecord() {
    gotoRecord(getCurrentRecordNumber() - 1);
 }//end previousRecord
+
+void DatabaseWindow::firstRecord() {
+   gotoRecord(0);
+}//end firstRecord
 
 void DatabaseWindow::gotoRecord(int record) {
    qDebug("Goto record #%d",record);

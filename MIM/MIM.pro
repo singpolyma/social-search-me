@@ -20,3 +20,4 @@ SOURCES += addresswindowimpl.cpp \
            mainwindowimpl.cpp
 
 QT += sql
+RESOURCES = resources/MIM.qrc

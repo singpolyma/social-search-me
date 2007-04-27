@@ -12,6 +12,9 @@
   <property name="windowTitle" >
    <string>Mailing Labels</string>
   </property>
+  <property name="windowIcon" >
+   <iconset resource="resources/MIM.qrc" >:/icons/MIM.png</iconset>
+  </property>
   <widget class="QWidget" name="gridLayout" >
    <property name="geometry" >
     <rect>
@@ -28,7 +31,7 @@
     <property name="spacing" >
      <number>6</number>
     </property>
-    <item row="0" column="0" >
+    <item row="0" column="1" >
      <spacer>
       <property name="orientation" >
        <enum>Qt::Horizontal</enum>
@@ -41,23 +44,44 @@
       </property>
      </spacer>
     </item>
-    <item row="0" column="1" >
+    <item row="0" column="2" >
      <widget class="QPushButton" name="mailMergeButton" >
       <property name="text" >
        <string>Mail Merge...</string>
       </property>
+      <property name="icon" >
+       <iconset resource="resources/MIM.qrc" >:/icons/page_white_word.png</iconset>
+      </property>
      </widget>
     </item>
-    <item row="0" column="2" >
+    <item row="0" column="3" >
      <widget class="QPushButton" name="printButton" >
       <property name="text" >
        <string>Print...</string>
+      </property>
+      <property name="icon" >
+       <iconset resource="resources/MIM.qrc" >:/icons/printer.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" >
+     <widget class="QComboBox" name="categorySelect" >
+      <property name="toolTip" >
+       <string>Select a category</string>
+      </property>
+      <property name="statusTip" >
+       <string>Select a category</string>
+      </property>
+      <property name="editable" >
+       <bool>true</bool>
       </property>
      </widget>
     </item>
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources/MIM.qrc" />
+ </resources>
  <connections/>
 </ui>

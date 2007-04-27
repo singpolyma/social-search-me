@@ -1,3 +1,25 @@
+/*
+
+LICENSE
+
+
+This program is free software; you can redistribute it 
+and/or modify it under the terms of the GNU General Public 
+License (GPL) as published by the Free Software Foundation; 
+either version 2 of the License, or (at your option) any 
+later version.
+
+This program is distributed in the hope that it will be 
+useful, but WITHOUT ANY WARRANTY; without even the 
+implied warranty of MERCHANTABILITY or FITNESS FOR A 
+PARTICULAR PURPOSE.  See the GNU General Public License 
+for more details.
+
+To read the license please visit
+http://www.gnu.org/copyleft/gpl.html
+
+*/
+
 #include "mailinglabelsimpl.h"
 
 void MailingLabelsImpl::doPaint(QPainter *painter, QPrinter *printer,int x, int y) {
@@ -9,38 +31,54 @@ void MailingLabelsImpl::doPaint(QPainter *painter, QPrinter *printer,int x, int 
    QSqlRecord loopRecord;
    QString lastNameThing;
    QString titleThing;
+   QString tmpstr = "";
+   QSqlQueryModel *query;
+   
+   if(categorySelect->currentText() == "All Categories") {//if selecting all categories
+      query = addressTable;
+   } else {//otherwise, SELECT
+      query = new QSqlQueryModel();
+      query->setQuery("SELECT address_id FROM Addresses2Categories WHERE category='" + categorySelect->currentText() + "'");
+      if(query->lastError().isValid()) qDebug() << query->lastError();
+      for(int i = 0; i < query->rowCount(); i++) {
+	      loopRecord = query->record(i);
+         tmpstr += " OR id=" + loopRecord.value("address_id").toString();
+      }//end for i < currencyTable->rowCount()
+      query->setQuery("SELECT * FROM Addresses WHERE " + tmpstr.remove(0,4));
+      if(query->lastError().isValid()) qDebug() << query->lastError();
+   }//end if-else All Categories
 
-   while(totalCount < addressTable->rowCount()) {
+   while(totalCount < query->rowCount()) {
 
-      for(int i = 0; i < 10 && totalCount < addressTable->rowCount(); i++) {//first column
-         loopRecord = addressTable->record(totalCount);
+      for(int i = 0; i < 10 && totalCount < query->rowCount(); i++) {//first column
+         loopRecord = query->record(totalCount);
          lastNameThing = loopRecord.value("lastName").toString() == "" ? "" : loopRecord.value("lastName").toString() + ", ";
          titleThing = loopRecord.value("title").toString() == "" ? "" : loopRecord.value("title").toString() + " ";
          painter->drawText(x + 4, y + 32 + (97 * i), 250, 94, Qt::AlignVCenter | Qt::AlignHCenter | Qt::TextWordWrap, lastNameThing + titleThing + loopRecord.value("firstName").toString() + "\n" + loopRecord.value("streetAddress").toString() + "\n" + loopRecord.value("city").toString() + ", " + loopRecord.value("province").toString() + "\n" + loopRecord.value("postalCode").toString() + "\n" + loopRecord.value("country").toString());
          totalCount++;
       }//end for i < 10 (first column)
  
-      if(!(totalCount < addressTable->rowCount())) {break;}//check main loop condition between sub-loops
+      if(!(totalCount < query->rowCount())) {break;}//check main loop condition between sub-loops
 
-      for(int i = 0; i < 10 && totalCount < addressTable->rowCount(); i++) {//second column
-         loopRecord = addressTable->record(totalCount);
+      for(int i = 0; i < 10 && totalCount < query->rowCount(); i++) {//second column
+         loopRecord = query->record(totalCount);
          lastNameThing = loopRecord.value("lastName").toString() == "" ? "" : loopRecord.value("lastName").toString() + ", ";
          titleThing = loopRecord.value("title").toString() == "" ? "" : loopRecord.value("title").toString() + " ";
          painter->drawText(x + (4 + 263), y + 32 + (97 * i), 250, 94, Qt::AlignVCenter | Qt::AlignHCenter | Qt::TextWordWrap, lastNameThing + titleThing + loopRecord.value("firstName").toString() + "\n" + loopRecord.value("streetAddress").toString() + "\n" + loopRecord.value("city").toString() + ", " + loopRecord.value("province").toString() + "\n" + loopRecord.value("postalCode").toString() + "\n" + loopRecord.value("country").toString());
          totalCount++;
       }//end for i < 10 (second column)
 
-      if(!(totalCount < addressTable->rowCount())) {break;}//check main loop condition between sub-loops
+      if(!(totalCount < query->rowCount())) {break;}//check main loop condition between sub-loops
 
-      for(int i = 0; i < 10 && totalCount < addressTable->rowCount(); i++) {//second column
-         loopRecord = addressTable->record(totalCount);
+      for(int i = 0; i < 10 && totalCount < query->rowCount(); i++) {//second column
+         loopRecord = query->record(totalCount);
          lastNameThing = loopRecord.value("lastName").toString() == "" ? "" : loopRecord.value("lastName").toString() + ", ";
          titleThing = loopRecord.value("title").toString() == "" ? "" : loopRecord.value("title").toString() + " ";
          painter->drawText(x + (4 + (263*2)), y + 32 + (97 * i), 250, 94, Qt::AlignVCenter | Qt::AlignHCenter | Qt::TextWordWrap, lastNameThing + titleThing + loopRecord.value("firstName").toString() + "\n" + loopRecord.value("streetAddress").toString() + "\n" + loopRecord.value("city").toString() + ", " + loopRecord.value("province").toString() + "\n" + loopRecord.value("postalCode").toString() + "\n" + loopRecord.value("country").toString());
          totalCount++;
       }//end for i < 10 (second column)
 
-      if(!(totalCount < addressTable->rowCount())) {break;}//check main loop condition between sub-loops
+      if(!(totalCount < query->rowCount())) {break;}//check main loop condition between sub-loops
 
       if(printer != 0) {
          printer->newPage();
@@ -48,7 +86,7 @@ void MailingLabelsImpl::doPaint(QPainter *painter, QPrinter *printer,int x, int 
          break;
       }//end if-else print
 
-   }//end while totalCount < addressTable->rowCount()
+   }//end while totalCount < query->rowCount()
 
    painter->end();
 }//end printTest
@@ -74,3 +112,7 @@ void MailingLabelsImpl::paintEvent(QPaintEvent *event) {
    painter.begin(this);
    doPaint(&painter, 0, (width()/2)-((270*3)/2), 20);
 }//end paintEvent
+
+void MailingLabelsImpl::doRefresh(int i) {
+   repaint(0,0,-1,-1);
+}//end doRefresh

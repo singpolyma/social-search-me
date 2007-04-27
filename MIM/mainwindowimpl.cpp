@@ -1,3 +1,25 @@
+/*
+
+LICENSE
+
+
+This program is free software; you can redistribute it 
+and/or modify it under the terms of the GNU General Public 
+License (GPL) as published by the Free Software Foundation; 
+either version 2 of the License, or (at your option) any 
+later version.
+
+This program is distributed in the hope that it will be 
+useful, but WITHOUT ANY WARRANTY; without even the 
+implied warranty of MERCHANTABILITY or FITNESS FOR A 
+PARTICULAR PURPOSE.  See the GNU General Public License 
+for more details.
+
+To read the license please visit
+http://www.gnu.org/copyleft/gpl.html
+
+*/
+
 #include "mainwindowimpl.h"
 
 AddressWindowImpl* MainWindowImpl::viewAddressesWindow(int record, bool locked) {
@@ -47,5 +69,5 @@ void MainWindowImpl::showMailingLabels() {
 }//end printTest
 
 void MainWindowImpl::about() {
-   QMessageBox::about(this, "About MIM", "Work in progress. Moving from MSAccess to Qt.\nWill be released as 2.0 BETA.\nhttp://mim.4x2.net/ -- Project Website\nmimproj@gmail.com -- Project email (not checked regularly)\nmim@singpolyma.net -- lead developer email");
+   QMessageBox::about(this, "About MIM", "<b>Work in progress.</b><br>Moving from MSAccess to Qt.<br>Versioning to be decided.<br>Dev stamp <b>1177706512</b><br><br><a href=\"http://mim.singpolyma.net/\">Project Website</a><br><a href=\"mailto:mim@singpolyma.net\">Email</a><br><br>Some icons from the <a href=\"http://famfamfam.com/lab/icons/silk/\">Silk icon set</a>");
 }//end about
