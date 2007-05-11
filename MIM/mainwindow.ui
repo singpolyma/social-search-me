@@ -910,7 +910,7 @@
      </palette>
     </property>
     <property name="title" >
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="actionAbout_MIM" />
     <addaction name="actionAbout_Qt" />
@@ -1280,6 +1280,8 @@
     <property name="title" >
      <string>&amp;File</string>
     </property>
+    <addaction name="actionImport" />
+    <addaction name="separator" />
     <addaction name="actionExit" />
    </widget>
    <addaction name="menuFile" />
@@ -1307,6 +1309,17 @@
   <action name="actionAbout_MIM" >
    <property name="text" >
     <string>About MIM...</string>
+   </property>
+   <property name="shortcut" >
+    <string>F1</string>
+   </property>
+   <property name="shortcutContext" >
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionImport" >
+   <property name="text" >
+    <string>&amp;Import...</string>
    </property>
   </action>
  </widget>

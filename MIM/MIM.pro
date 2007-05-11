@@ -11,13 +11,20 @@ INCLUDEPATH += .
 HEADERS += addresswindowimpl.h \
            databasewindow.h \
            mailinglabelsimpl.h \
-           mainwindowimpl.h
+           mainwindowimpl.h \
+           sxwplaindriver.h \
+           sqlimportwindow.h
+#           importxmlhandler.h
 FORMS += addresswindow.ui mailinglabels.ui mainwindow.ui
 SOURCES += addresswindowimpl.cpp \
            databasewindow.cpp \
            mailinglabelsimpl.cpp \
            main.cpp \
-           mainwindowimpl.cpp
+           mainwindowimpl.cpp \
+           sxwplaindriver.cpp \
+           sqlimportwindow.cpp
+#           importxmlhandler.cpp
 
 QT += sql
+# QT += xml
 RESOURCES = resources/MIM.qrc

@@ -29,7 +29,6 @@ void AddressWindowImpl::refresh(bool newRecord) {
    }//end if ! newRecord
    refreshCategories();
    calculateSupport();
-   businessToggle(isBusinessBox->checkState());
 }//end refresh(bool newRecord)
 
 void AddressWindowImpl::refresh() {
@@ -39,12 +38,12 @@ void AddressWindowImpl::refresh() {
 bool AddressWindowImpl::lock(bool state, QList<QObject *> *get) {
    bool rtrn = DatabaseWindow::lock(state, get);
    if(state) {
-      isBusinessBox->setVisible(false);
+      isOrganizationBox->setVisible(false);
       addCategoryButton->setVisible(false);
       deleteCategoryButton->setVisible(false);
       newCategoryCombo->setVisible(false);
    } else {
-      isBusinessBox->setVisible(true);
+      isOrganizationBox->setVisible(true);
       addCategoryButton->setVisible(true);
       deleteCategoryButton->setVisible(true);
       newCategoryCombo->setVisible(true);
@@ -72,22 +71,6 @@ void AddressWindowImpl::refreshCategories() {
    if(query->lastError().isValid()) qDebug() << query->lastError();
    newCategoryCombo->setModel(query);
 }//end refreshCategories
-   
-void AddressWindowImpl::businessToggle(int state) {
-   if(state == Qt::Checked) {
-      lastNameBox->setText("");
-      lastNameBox->setVisible(false);
-      lastNameLabel->setVisible(false);
-      titleBox->setVisible(false);
-      titleBox->setText("");
-      firstNameLabel->setText("Business Name");
-   } else {
-      lastNameBox->setVisible(true);
-      lastNameLabel->setVisible(true);
-      titleBox->setVisible(true);
-      firstNameLabel->setText("First Name");
-   }//end if-else state == Qt::Checked
-}//end calculateSupport int i
 
 void AddressWindowImpl::addCategory() {
    //Perhaps this should check if the category is already on the item?

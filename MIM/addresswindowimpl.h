@@ -65,7 +65,6 @@ public:
       connect(supportBox, SIGNAL(editingFinished()), this, SLOT(calculateSupport()));
       connect(periodBox, SIGNAL(editingFinished()), this, SLOT(calculateSupport()));
       connect(currencyBox, SIGNAL(currentIndexChanged(int)), this, SLOT(calculateSupport(int)));
-      connect(isBusinessBox, SIGNAL(stateChanged(int)), this, SLOT(businessToggle(int)));
       connect(addCategoryButton, SIGNAL(clicked()), this, SLOT(addCategory()));
       connect(deleteCategoryButton, SIGNAL(clicked()), this, SLOT(deleteCategory()));
 
@@ -77,7 +76,6 @@ public slots:
    virtual bool lock(bool state, QList<QObject *> *get);
    virtual void calculateSupport();
    virtual void calculateSupport(int i);
-   virtual void businessToggle(int state);
    virtual void addCategory();
    virtual void deleteCategory();
    

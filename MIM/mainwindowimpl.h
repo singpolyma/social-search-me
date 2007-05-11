@@ -33,10 +33,14 @@ http://www.gnu.org/copyleft/gpl.html
 #include <QTableView>
 #include <QVariant>
 #include <QMap>
+#include <QErrorMessage>
+#include <QFileDialog>
 
 #include "ui_mainwindow.h"
 #include "addresswindowimpl.h"
 #include "mailinglabelsimpl.h"
+#include "sxwplaindriver.h"
+#include "sqlimportwindow.h"
 
 class MainWindowImpl : public QMainWindow, Ui::MainWindow
 {
@@ -46,6 +50,13 @@ public:
    QSqlDatabase db;//database link
 
    MainWindowImpl() : QMainWindow() {
+   
+     QStringList args = qApp->arguments();
+     if(args.contains("--help") || args.contains("\?") || args.contains("/?") || args.contains("-h")) {
+        printf("\nMissionary Information Manager - pre-release.\nQt version %s\n\nSupported arguments:\n   --help     Displays this information.\n   --debug    Displays more obvious debug data.\n\n",qVersion());
+        exit(0);
+     }//end if --help
+      if(qApp->arguments().contains("--debug")) QErrorMessage::qtHandler();
 
       setupUi(this);
 
@@ -66,9 +77,11 @@ public:
 	  
 	  /* DATABASE SETUP */
 QSqlQuery query;
-query.exec("CREATE TABLE Addresses (id INTEGER PRIMARY KEY, title VARCHAR(5), firstName VARCHAR(20), lastName VARCHAR(20), streetAddress VARCHAR(50), city VARCHAR(20), province VARCHAR(20), postalCode VARCHAR(10), country VARCHAR(20), spouseName VARCHAR(20), homePhone VARCHAR(11), workPhone VARCHAR(11), workExtension VARCHAR(3), fax VARCHAR(11), cellPhone VARCHAR(11), email VARCHAR(50), url VARCHAR(255), birthdate DATE, anniversary DATE, notes TEXT, support INTEGER, currency VARCHAR(3), period INTEGER, isBusiness INTEGER)");
-for(int i = 0; i < 32; i++)
-   query.exec("INSERT INTO Addresses values(null, 'Mr.', 'Danny " + (new QVariant(i))->toString() + "', 'Young', '380 Louisa St.', 'Wako', 'BC', 'H2H 6J7', 'Canada', '', '', '', '', '', '', 'dude@place.net', 'http://example.com/', '', '', '', 1, 'CDN', 12, 0)");
+query.exec("CREATE TABLE Addresses (id INTEGER PRIMARY KEY, isOrganization INTEGER, title VARCHAR(5), firstName VARCHAR(20), lastName VARCHAR(20), organization VARCHAR(20), streetAddress VARCHAR(50), city VARCHAR(20), province VARCHAR(20), postalCode VARCHAR(10), country VARCHAR(20), spouseName VARCHAR(20), homePhone VARCHAR(11), workPhone VARCHAR(11), workExtension VARCHAR(3), fax VARCHAR(11), cellPhone VARCHAR(11), email VARCHAR(50), url VARCHAR(255), birthdate DATE, anniversary DATE, notes TEXT, support INTEGER, currency VARCHAR(3), period INTEGER)");
+for(int i = 0; i < 10; i++)
+   query.exec("INSERT INTO Addresses values(null, 0, 'Mr.', 'Danny " + (new QVariant(i))->toString() + "', 'Young', '', '380 Louisa St.', 'Wako', 'BC', 'H2H 6J7', 'Canada', '', '', '', '', '', '', 'dude@place.net', 'http://example.com/', '', '', '', 1, 'CDN', 12)");
+query.exec("INSERT INTO Addresses values(null, 1, 'Mr.', 'Danny', 'Young', 'Building', '380 Louisa St.', 'Wako', 'BC', 'H2H 6J7', 'Canada', '', '', '', '', '', '', 'dude@place.net', 'http://example.com/', '', '', '', 1, 'CDN', 12)");
+query.exec("INSERT INTO Addresses values(null, 0, 'Mr.', 'Danny', 'Young', 'Building', '380 Louisa St.', 'Wako', 'BC', 'H2H 6J7', 'Canada', '', '', '', '', '', '', 'dude@place.net', 'http://example.com/', '', '', '', 1, 'CDN', 12)");
 //currencies
 //WARNING - SYMBOL IS USED AS PRIMARY KEY IN PROGRAM (IE, SYMBOL IS STORED IN ADDRESSES TABLE)
 query.exec("CREATE TABLE Currencies (id INTEGER PRIMARY KEY, symbol CHAR(3), value INTEGER)");
@@ -82,24 +95,24 @@ query.exec("INSERT INTO Addresses2Categories values(null, 'newsletter', 2)");
       addressTable = new QSqlTableModel();
       addressTable->setTable("Addresses");
       addressTable->setEditStrategy(QSqlTableModel::OnManualSubmit);
+      addressTable->setSort(1,Qt::AscendingOrder);
+      addressTable->setSort(5,Qt::AscendingOrder);
+      addressTable->setSort(4,Qt::AscendingOrder);
+      addressTable->setSort(3,Qt::AscendingOrder);
       addressTable->select();
 	  
-	  currencyTable = new QSqlTableModel();
+      currencyTable = new QSqlTableModel();
       currencyTable->setTable("Currencies");
-	  currencyTable->setEditStrategy(QSqlTableModel::OnManualSubmit);
+	   currencyTable->setEditStrategy(QSqlTableModel::OnManualSubmit);
       currencyTable->select();
-
-      QSqlRecord loopRecord;
-      nameSelectBox->addItem("- Contacts -");
-      for(int i = 0; i < addressTable->rowCount(); i++) {//loop through Addresses table
-         loopRecord = addressTable->record(i);
-         nameSelectBox->addItem(loopRecord.value("lastName").toString() + ", " + loopRecord.value("firstName").toString());
-      }//end for i < addressTable->rowCount()
+      
+      enterEvent(new QEvent(QEvent::None));
 
       connect(viewAddressesButton, SIGNAL(clicked()), this, SLOT(viewAddressesWindow()));
       connect(addAddressButton, SIGNAL(clicked()), this, SLOT(addAddresses()));
       connect(actionAbout_Qt, SIGNAL(activated()), qApp, SLOT(aboutQt()));
       connect(actionAbout_MIM, SIGNAL(activated()), this, SLOT(about()));
+      connect(actionImport, SIGNAL(activated()), this, SLOT(import()));
       connect(nameSelectBox, SIGNAL(currentIndexChanged(int)), this, SLOT(selectBoxActivated(int)));
       connect(mailingLabelsButton, SIGNAL(clicked()), this, SLOT(showMailingLabels()));
       new QShortcut(*new QKeySequence("F11"), this, SLOT(f11()), SLOT(f11()), Qt::ApplicationShortcut);
@@ -116,10 +129,12 @@ protected slots:
    virtual void f11();
    virtual void showMailingLabels();
    virtual void about();
+   virtual void import();
    
 protected:
    QSqlTableModel *addressTable;
    QSqlTableModel *currencyTable;
+   virtual void enterEvent(QEvent *event);
 
 };
 

@@ -117,7 +117,7 @@ void DatabaseWindow::saveRecord() {
    QObject *box;
    bool isNotBlank = false;//should we actually save, or is this record blank?
    bool isNotChanged = true;//should we actually save, or has nothing been changed?
-   qDebug("[Initial] %s",isNotChanged ? "Not changed : true" : "Not changed : false");
+//   qDebug("[Initial] %s",isNotChanged ? "Not changed : true" : "Not changed : false");
    for(int i = 0; i < currentRecord.count(); i++) {//loop through record fields
       field = currentRecord.field(i);
       box = findChild<QLineEdit *>(field.name() + "Box");
@@ -130,45 +130,45 @@ void DatabaseWindow::saveRecord() {
 		 }//end if inputMask
 	       isNotBlank = isNotBlank || (((QLineEdit *)box)->text() != "" && ((QLineEdit *)box)->text() != "0" && ((QLineEdit *)box)->text() != inputMask);
 	       isNotChanged = isNotChanged && ((((QLineEdit *)box)->text() == field.value().toString()) || (field.value().toString() == "" && (((QLineEdit *)box)->text() == inputMask) || (((QLineEdit *)box)->text() == "0")));
-	       qDebug("[LineEdit (%s)] %s",field.name().toAscii().data(), isNotChanged ? "Not changed : true" : "Not changed : false");
+//	       qDebug("[LineEdit (%s)] %s",field.name().toAscii().data(), isNotChanged ? "Not changed : true" : "Not changed : false");
           currentRecord.setValue(field.name(), ((QLineEdit *)box)->text());
       } else {//try another type
          box = findChild<QTextEdit *>(field.name() + "Box");
          if(box != 0) {
             isNotBlank = isNotBlank || (((QTextEdit *)box)->toPlainText() != "");
             isNotChanged = isNotChanged && (((QTextEdit *)box)->toPlainText() == field.value().toString());
-            qDebug("[TextEdit (%s)] %s",field.name().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
+//            qDebug("[TextEdit (%s)] %s",field.name().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
             currentRecord.setValue(field.name(), ((QTextEdit *)box)->toPlainText());
          } else {//try another type
 		    box = findChild<QDateEdit *>(field.name() + "Box");
 			if(box != 0) {
 			   isNotBlank = isNotBlank || (((QDateEdit *)box)->date() != QDate(2000,1,1));
 			   isNotChanged = isNotChanged && ((((QDateEdit *)box)->date().toString() == field.value().toString()) || (field.value().toString() == "" && (((QDateEdit *)box)->date() == QDate(2000,1,1))));
-			   qDebug("[DateEdit (%s)] %s",field.name().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
+//			   qDebug("[DateEdit (%s)] %s",field.name().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
 			   currentRecord.setValue(field.name(), ((QDateEdit *)box)->date().toString());
 			} else {//try another type
 			   box = findChild<QComboBox *>(field.name() + "Box");
 			   if(box != 0) {
 			      isNotBlank = isNotBlank || (((QComboBox *)box)->currentText() != "");
 			      isNotChanged = isNotChanged && (((QComboBox *)box)->currentText() == field.value().toString());
-			      qDebug("[ComboBox (%s)] %s",field.name().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
+//			      qDebug("[ComboBox (%s)] %s",field.name().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
 				   currentRecord.setValue(field.name(), ((QComboBox *)box)->currentText());
 			   } else {
 			      box = findChild<QCheckBox *>(field.name() + "Box");
 				  if(box != 0) {
 				     if(((QCheckBox *)box)->checkState() == Qt::Checked) {
 				        isNotChanged = isNotChanged && (field.value().toString() == "1");
-				        qDebug("[Checkbox (%s)] %s",field.name().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
+//				        qDebug("[Checkbox (%s)] %s",field.name().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
 				        currentRecord.setValue(field.name(), "1");
 				     }//end if Qt::Checked
 					  if(((QCheckBox *)box)->checkState() == Qt::Unchecked) {
 				        isNotChanged = isNotChanged && (field.value().toString() == "0");
-				        qDebug("[Checkbox (%s)] %s",field.name().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
+//				        qDebug("[Checkbox (%s)] %s",field.name().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
 					     currentRecord.setValue(field.name(), "0");
 					  }//end if Qt::Unchecked
 					  if(((QCheckBox *)box)->checkState() == Qt::PartiallyChecked) {
 				        isNotChanged = isNotChanged && (field.value().toString() == "2");
-				        qDebug("[Checkbox (%s)] %s",field.name().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
+//				        qDebug("[Checkbox (%s)] %s",field.name().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
 					     currentRecord.setValue(field.name(), "2");
 					  }//end if Qt::PartiallyChecked
 				  }//end if checkBox != 0
