@@ -1,10 +1,10 @@
 ﻿// FreshTags0.5-Singpolyma2
 // Tag-Driven Blog Navigation
 // www.greg-hill.id.au 2006
-// modifications by Stephen Paul Weber a.k.a. Singpolyma (singpolyma-tech.blogspot.com)
+// modifications by Stephen Paul Weber a.k.a. Singpolyma (singpolyma.net)
 // This work is licensed under a Creative Commons Attribution-ShareAlike 2.1 Australia License.
 //     (http://creativecommons.org/licenses/by-sa/2.1/au/)
-// URL: http://singpolyma-tech.blogspot.com/2006/02/freshtags-singpolyma.html
+// URL: http://singpolyma.net/plugins/freshtags
 // Original URL: http://ghill.customer.netspace.net.au/freshtags/
 
 //add the asynch load event
@@ -99,7 +99,10 @@ function freshtags_load_sub(id,allowexternal) {
       if(WidgetData['freshtags'][id]['source'] == 'mediawiki') writeScript('http://singpolymaplay.ning.com/MediaWiki-categories.php?xn_auth=no&mainpage='+encodeURIComponent(WidgetData['freshtags'][id]['mainpage'])+'&callback=WidgetData[\'freshtags\'][\''+id+'\'][\'main_tags_loaded\']');
    } else if ((WidgetData['freshtags'][id]['type'] == 'posts' && (!WidgetData['freshtags'][id]['tag_list'] || allowexternal)) || (allowexternal && WidgetData['freshtags'][id]['type'] == 'external')) {
       //TODO : need to get all tags for this user (for filter)
-      WidgetData['freshtags'][id]['curr_tags'] = get_current_tags(WidgetData['freshtags'][id]['defs'],'',WidgetData['freshtags'][id]['no_autocapture']);
+      if(!WidgetData['freshtags'][id]['force_defs'])
+         WidgetData['freshtags'][id]['curr_tags'] = get_current_tags(WidgetData['freshtags'][id]['defs'],'',WidgetData['freshtags'][id]['no_autocapture']);
+      else
+         WidgetData['freshtags'][id]['curr_tags'] = WidgetData['freshtags'][id]['defs'];
       process_source(id);
    }//end if-else-if type==tags, etc
 }//end function freshtags_load_sub
@@ -236,6 +239,7 @@ function process_source(id,feedoverride) {
       username = WidgetData['freshtags'][id]['username'];
       anchor = WidgetData['freshtags'][id]['anchor'];
    }//end if username
+   if(!anchor || anchor == 'undefined') anchor = '';
    if(!WidgetData['freshtags'][id]['source']) WidgetData['freshtags'][id]['source'] = 'del.icio.us';
    if(!feedoverride && (WidgetData['freshtags'][id]['source'] == 'del.icio.us' || WidgetData['freshtags'][id]['source'] == 'delicious' || WidgetData['freshtags'][id]['source'] == 'wordpress')) {
       WidgetData['freshtags'][id]['posts_loaded'] = eval('function(delicious_data,onnull){posts_loaded(delicious_data,"'+id+'",function(id){if(WidgetData[\'freshtags\'][id][\'feedurl\']) {process_source(id,true);return true;}return false;});}');
