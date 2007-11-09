@@ -10,34 +10,49 @@ require('table-extractor.php');
 $tableP = new tableExtractor();
 $tableP->anchor = '<div class="informaltable">';
 $tableP->source = file_get_contents('http://standards.freedesktop.org/menu-spec/latest/apa.html');
-foreach($tableP->extractTable() as $row) {
-	if(is_numeric(substr($row['Main Category'],0,1))) continue;
-	echo 'Menu *'.$row['Main Category']." = NULL;\n";
+$tableParr = $tableP->extractTable();
+$MainCategories = array();
+//foreach($tableParr as $key => $row) if(is_numeric(substr($row['Main Category'],0,1))) unset($tableParr[$key]);
+echo "char *MainCategories[".count($tableParr)."] = {\n";
+foreach($tableParr as $row) {
+	$MainCategories[] = $row['Main Category'];
+	echo "\t\"".$row['Main Category']."\",\n";
 }
+echo "};\n";
+echo "Menu *MainCategoryLists[".count($tableParr)."];\n";
+echo "#define MAIN_CATEGORY_COUNT ".count($tableParr)."\n";
 
 echo "\n/* Additional Categories */\n";
 $tableA = new tableExtractor();
 $tableA->anchor = 'Additional Category';
 $tableA->source = file_get_contents('http://standards.freedesktop.org/menu-spec/latest/apa.html');
-foreach($tableA->extractTable() as $row) {
-	if(is_numeric(substr($row['Additional Category'],0,1))) continue;
-        echo 'Menu *'.$row['Additional Category'].' = NULL; /* With '.$row['Related Categories']." */\n";
-}
+$tableAarr = $tableA->extractTable();
+//foreach($tableAarr as $key => $row) if(is_numeric(substr($row['Additional Category'],0,1))) unset($tableAarr[$key]);
+echo "char *AdditionalCategories[".count($tableAarr)."] = {\n";
+foreach($tableAarr as $row) echo "\t\"".$row['Additional Category']."\", /* With ".$row['Related Categories']." */\n";
+echo "};\n";
+echo "Menu *AdditionalCategoryLists[".count($tableAarr)."];\n";
+echo "#define ADDITIONAL_CATEGORY_COUNT ".count($tableAarr)."\n";
 
-echo "\n/* FUNCTION */\n";
-echo "void add_to_cat(char *cat, MenuItem *item) {\n";
-echo "\tMenu *this_node;\n";
-echo "\tDYNAMIC_STRUCT(this_node);\n";
-echo "\tthis_node->item = item;\n";
-echo "\n\t/* Main Categories */\n";
-foreach($tableP->extractTable() as $row) {
-	if(is_numeric(substr($row['Main Category'],0,1))) continue;
-	echo "\t".'ADD_IF_CAT_P(cat,this_node,'.$row['Main Category'].");\n";
-}
-echo "\n\t/* Additional Categories */\n";
-foreach($tableA->extractTable() as $row) {
-	if(is_numeric(substr($row['Additional Category'],0,1))) continue;
-	echo "\t".'ADD_IF_CAT_A(cat,this_node,'.$row['Additional Category'].");\n";
+echo "\n/* Main->Additional items  */\n";
+echo "void add_additional_categories() {\n";
+echo "\tMenuItem *new_item;\n";
+foreach($tableAarr as $idx2 => $row) {
+	$rcats = explode(';',$row['Related Categories']);
+	if($rcats && count($rcats)) {
+		foreach($rcats as $rcat) {
+			$idx = array_search($rcat,$MainCategories);
+			if(!$idx) continue;
+			echo "\n\tif(AdditionalCategoryLists[".($idx2-1)."] != NULL) {\n";
+			echo "\t\tDYNAMIC_STRUCT(new_item);\n";
+			$title = preg_replace('/([A-Z])/',' $1',$row['Additional Category']);
+			$title = substr($title,1,strlen($title)-1);
+			echo "\t\tnew_item->title = \"<".$title.">\";\n";
+			echo "\t\tnew_item->command = \"".($idx2)."\";\n";
+			echo "\t\tadd_to_cat(\"".$rcat."\",new_item,FALSE);\n";
+			echo "\t}\n";
+		}
+	}
 }
 echo "\n}\n";
 ?>

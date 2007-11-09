@@ -4,6 +4,32 @@
 #include "mnu.h"
 #include "categories.h"
 
+void add_to_cat(char *cat, MenuItem *item, BOOL acat) {
+	int i;
+	Menu *new_node;
+	DYNAMIC_STRUCT(new_node);
+	new_node->item = item;
+	for(i = 0; i < MAIN_CATEGORY_COUNT; i++) {
+		if(strcmp(cat,MainCategories[i]) == 0) {
+			if(MainCategoryLists[i] != NULL) MainCategoryLists[i]->previousNode = new_node;
+			new_node->nextNode = MainCategoryLists[i];
+			MainCategoryLists[i] = new_node;
+			return;
+		}
+	}
+	if(acat) {
+		for(i = 0; i < ADDITIONAL_CATEGORY_COUNT; i++) {
+			if(strcmp(cat,AdditionalCategories[i]) == 0) {
+				item->hasAdditionalCategory = TRUE;
+				if(AdditionalCategoryLists[i] != NULL) AdditionalCategoryLists[i]->previousNode = new_node;
+				new_node->nextNode = AdditionalCategoryLists[i];
+				AdditionalCategoryLists[i] = new_node;
+				return;
+			}
+		}
+	}
+}
+
 int file_select(struct direct *entry) {/* do a string comparison so that only .desktop files will be selected - probably should actually do this based on mime type */
 	char *ptr = rindex(entry->d_name, '.');
 	if(ptr != NULL && (strcmp(ptr, ".desktop") == 0))
@@ -29,7 +55,7 @@ void parse_desktop_file(char *path) {
 		if(strcmp(key,"Categories") == 0) {
 			cat = strtok(val,";");
 			while(cat != NULL) {
-				add_to_cat(cat,this_item);
+				add_to_cat(cat,this_item, TRUE);
 				cat = strtok(NULL,";");
 			}/* end while */
 		}/* end if Categories */
@@ -72,22 +98,31 @@ void read_xdg_menu() {
 	free(xdg_data_dirs);
 }
 
-void draw_menu() {
+void draw_menu(BOOL acat) {
 	Menu *curr = current_menu_head;
-	if(current_menu_item == NULL) {
-		
-	}
-	while(curr != NULL) {
-		if(curr == current_menu_item)
-			printf("[*] %s\n",curr->item->title);
-		else
-			printf("[ ] %s\n",curr->item->title);
-		curr = curr->nextNode;
+	if(curr == NULL) {/* draw the main menu */
+		int i;
+		for(i = 0; i < MAIN_CATEGORY_COUNT; i++) {
+			if(i == current_menu_category)
+				printf("[*] %s\n",MainCategories[i]);
+			else
+				printf("[ ] %s\n",MainCategories[i]);
+		}
+	} else {
+		while(curr != NULL) {
+			if(curr == current_menu_item)
+				printf("[*] %s\n",curr->item->title);
+			else
+				printf("[ ] %s\n",curr->item->title);
+			curr = curr->nextNode;
+		}
 	}
 }
 
 void menu_next() {
-	if(current_menu_item == NULL) {//if we are on a category part of the menu
+	if(current_menu_head == NULL) {/* if we are on the main menu */
+		current_menu_category++;
+		if(current_menu_category >= MAIN_CATEGORY_COUNT) current_menu_category = 0;
 	} else {
 		current_menu_item = current_menu_item->nextNode;
 		if(current_menu_item == NULL) current_menu_item = current_menu_head;
@@ -95,7 +130,9 @@ void menu_next() {
 }
 
 void menu_prev() {
-	if(current_menu_item == NULL) {//if we are on a category part of the menu
+	if(current_menu_head == NULL) {/* if we are on the main menu */
+		current_menu_category--;
+		if(current_menu_category <= 0) current_menu_category = MAIN_CATEGORY_COUNT-1;
 	} else {
 		current_menu_item = current_menu_item->previousNode;
 		if(current_menu_item == NULL) current_menu_item = current_menu_head;
@@ -103,34 +140,56 @@ void menu_prev() {
 }
 
 void menu_go() {
-	printf("\nLaunching program \"%s\"...\n",current_menu_item->item->title);
-	if(fork() == 0) {
-		if(fork() == 0) {
-			execl("/bin/sh","/bin/sh","-c",current_menu_item->item->command,(char*)NULL);
+	if(current_menu_head == NULL) {/* if we are on the main menu */
+		previous_menu_head = NULL;
+		current_menu_head = current_menu_item = MainCategoryLists[current_menu_category];
+	} else {
+		int command_cat = atoi(current_menu_item->item->command);
+		if(command_cat) {
+			command_cat--;/* We store the index+1 to distinguish between the first category index and a non-category */
+			if(AdditionalCategoryLists[command_cat] != NULL) {
+				previous_menu_head = current_menu_head;
+				current_menu_head = current_menu_item = AdditionalCategoryLists[command_cat];
+			}
+		} else {
+			printf("\nLaunching program \"%s\"...\n",current_menu_item->item->title);
+			if(fork() == 0) {
+				if(fork() == 0) {
+					execl("/bin/sh","/bin/sh","-c",current_menu_item->item->command,(char*)NULL);
+				}
+			}
+			exit(0);
 		}
 	}
-	exit(0);
 }
 
 int main(int argc, char *argv[]) {
 	int i;
+	BOOL acat = TRUE;/* Should we bother processing additional categories, this should cause the lists not to be placed into memory, etc, as well eventually */
 	for(i = 1; i < argc; i++) /* handle command line arguments */
-		if(!strncmp(argv[i], "-v", 3))
+		if(strncmp(argv[i], "-v", 3) == 0)
 			eprint("mnu-"VERSION", (C)opyright 2007, Stephen Paul Weber\n");
+		else if(strncmp(argv[i], "-noadd", 3) == 0)
+			acat = FALSE;
 		else
 			eprint("usage: mnu\n");	
-	
+
 	read_xdg_menu();
+	if(acat) add_additional_categories();
 	set_input_mode();
-	current_menu_head = current_menu_item = Game;
 	char in;
 	while(in != 'q') {
 		system("clear");
-		draw_menu();
+		draw_menu(acat);
 		read(STDIN_FILENO, &in, 1);
 		if(in == 'j') menu_next();
 		if(in == 'k') menu_prev();
-		if(in == '\n') menu_go();
+		if(in == 'h') {
+			if(current_menu_head == NULL) return 0;
+			current_menu_head = current_menu_item = previous_menu_head;
+			previous_menu_head = NULL;
+		}
+		if(in == '\n' || in == 'l') menu_go();
 	}
 	
 	return 0;

@@ -25,6 +25,7 @@ struct MenuItem {
         BOOL hasAdditionalCategory;
         /*Menu *categories[MAX_ITEM_CATEGORIES];*/
         /* OnlyShowIn */
+	/* Icon */
 };
 
 typedef struct Menu Menu;
@@ -36,7 +37,9 @@ struct Menu {
 
 /* NON-CATEGORY GLOBALS */
 Menu *current_menu_item = NULL;
+int current_menu_category = 0;
 Menu *current_menu_head = NULL;
+Menu *previous_menu_head = NULL;
 
 /* FUNCTIONS */
 void eprint(const char *errstr, ...) {
@@ -44,10 +47,14 @@ void eprint(const char *errstr, ...) {
         exit(EXIT_FAILURE);
 }
 
-void add_to_cat(char *cat, MenuItem *item);
+void add_additional_categories();
+void add_to_cat(char *cat, MenuItem *item, BOOL acat);
 int file_select(struct direct *entry);
 void parse_desktop_file(char *path);
 char** get_xdg_data_dirs();
 void read_xdg_menu();
-void draw_menu();
+void draw_menu(BOOL acat);
+void menu_next();
+void menu_prev();
+void menu_go();
 int main(int argc, char *argv[]);
