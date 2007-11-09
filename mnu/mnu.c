@@ -20,7 +20,7 @@ void add_to_cat(char *cat, MenuItem *item, BOOL acat) {
 	if(acat) {
 		for(i = 0; i < ADDITIONAL_CATEGORY_COUNT; i++) {
 			if(strcmp(cat,AdditionalCategories[i]) == 0) {
-				item->hasAdditionalCategory = TRUE;
+/*				item->hasAdditionalCategory = TRUE;*/
 				if(AdditionalCategoryLists[i] != NULL) AdditionalCategoryLists[i]->previousNode = new_node;
 				new_node->nextNode = AdditionalCategoryLists[i];
 				AdditionalCategoryLists[i] = new_node;
@@ -37,7 +37,7 @@ int file_select(struct direct *entry) {/* do a string comparison so that only .d
 	return FALSE;
 }
 
-void parse_desktop_file(char *path) {
+void parse_desktop_file(char *path, BOOL acat) {
 	char line[100], *key, *val, *cat;
 	FILE *fp = fopen(path,"r");
 	MenuItem *this_item;
@@ -55,7 +55,7 @@ void parse_desktop_file(char *path) {
 		if(strcmp(key,"Categories") == 0) {
 			cat = strtok(val,";");
 			while(cat != NULL) {
-				add_to_cat(cat,this_item, TRUE);
+				add_to_cat(cat,this_item, acat);
 				cat = strtok(NULL,";");
 			}/* end while */
 		}/* end if Categories */
@@ -80,7 +80,8 @@ char** get_xdg_data_dirs() {
 	}
 }
 
-void read_xdg_menu() {
+void read_xdg_menu(BOOL acat) {
+	/* TODO: come up with a way to not put items on main categories if they hasAdditionalCategory, simply not displaying fails because the list is still being traversed */
 	int i, i2, fileCount;
 	struct direct **files;
 	char tmp[255], **xdg_data_dirs;
@@ -91,7 +92,7 @@ void read_xdg_menu() {
                 for(i2 = fileCount-1; i2 > 0; i2--) {
                         strcpy(tmp,xdg_data_dirs[i]);
                         strcat(tmp,files[i2]->d_name);
-                        parse_desktop_file(tmp);
+                        parse_desktop_file(tmp,acat);
                 }
         }
         free(files);
@@ -165,19 +166,29 @@ void menu_go() {
 
 int main(int argc, char *argv[]) {
 	int i;
+	char *initial_category;
+	char in;
 	BOOL acat = TRUE;/* Should we bother processing additional categories, this should cause the lists not to be placed into memory, etc, as well eventually */
 	for(i = 1; i < argc; i++) /* handle command line arguments */
 		if(strncmp(argv[i], "-v", 3) == 0)
 			eprint("mnu-"VERSION", (C)opyright 2007, Stephen Paul Weber\n");
-		else if(strncmp(argv[i], "-noadd", 3) == 0)
+		else if(strncmp(argv[i], "-na", 4) == 0)
 			acat = FALSE;
-		else
-			eprint("usage: mnu\n");	
+		else if(i+1 < argc && strncmp(argv[i], "-c", 3) == 0) {
+			initial_category = argv[i+1];
+			break;
+		} else
+			eprint("usage: mnu [-v] [-na] [-c CATEGORY]\nType \"man mnu\" for more information.\n");
 
-	read_xdg_menu();
+	read_xdg_menu(acat);
 	if(acat) add_additional_categories();
+	for(i = 0; i < MAIN_CATEGORY_COUNT; i++) {
+		if(strcmp(MainCategories[i],initial_category) == 0) {
+			current_menu_head = current_menu_item = MainCategoryLists[i];
+			break;
+		}
+	}
 	set_input_mode();
-	char in;
 	while(in != 'q') {
 		system("clear");
 		draw_menu(acat);

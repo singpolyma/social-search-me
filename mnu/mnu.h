@@ -13,8 +13,6 @@
 #define DYNAMIC_STRUCT(v) if((v = malloc(sizeof(*v))) == NULL) eprint("Memory allocation error.\n");
 #define DYNAMIC_STRING(o,i) if((o = malloc(strlen(i))) == NULL) eprint("Memory allocation error.\n");
 #define DYNAMIC_STRING_COPY(o,i) DYNAMIC_STRING(o,i); strcpy(o,i);
-#define ADD_IF_CAT_P(a,n,c) if(strcmp(a,#c) == 0) {if(c != NULL) c->previousNode = n; n->nextNode = c; c = n; return;}
-#define ADD_IF_CAT_A(a,n,c) if(strcmp(a,#c) == 0) {if(c != NULL) c->previousNode = n; n->nextNode = c; n->item->hasAdditionalCategory = TRUE; c = n; return;}
 
 /* TYPES */
 typedef char BOOL;
@@ -22,7 +20,7 @@ typedef char BOOL;
 typedef struct MenuItem MenuItem;
 struct MenuItem {
         char *title, *command;
-        BOOL hasAdditionalCategory;
+/*        BOOL hasAdditionalCategory;*/
         /*Menu *categories[MAX_ITEM_CATEGORIES];*/
         /* OnlyShowIn */
 	/* Icon */
@@ -50,9 +48,9 @@ void eprint(const char *errstr, ...) {
 void add_additional_categories();
 void add_to_cat(char *cat, MenuItem *item, BOOL acat);
 int file_select(struct direct *entry);
-void parse_desktop_file(char *path);
+void parse_desktop_file(char *path, BOOL acat);
 char** get_xdg_data_dirs();
-void read_xdg_menu();
+void read_xdg_menu(BOOL acat);
 void draw_menu(BOOL acat);
 void menu_next();
 void menu_prev();
