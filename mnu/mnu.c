@@ -166,7 +166,7 @@ void menu_go() {
 
 int main(int argc, char *argv[]) {
 	int i;
-	char *initial_category;
+	char *initial_category = NULL;
 	char in;
 	BOOL acat = TRUE;/* Should we bother processing additional categories, this should cause the lists not to be placed into memory, etc, as well eventually */
 	for(i = 1; i < argc; i++) /* handle command line arguments */
@@ -182,10 +182,12 @@ int main(int argc, char *argv[]) {
 
 	read_xdg_menu(acat);
 	if(acat) add_additional_categories();
-	for(i = 0; i < MAIN_CATEGORY_COUNT; i++) {
-		if(strcmp(MainCategories[i],initial_category) == 0) {
-			current_menu_head = current_menu_item = MainCategoryLists[i];
-			break;
+	if(initial_category != NULL) {
+		for(i = 0; i < MAIN_CATEGORY_COUNT; i++) {
+			if(strcmp(MainCategories[i],initial_category) == 0) {
+				current_menu_head = current_menu_item = MainCategoryLists[i];
+				break;
+			}
 		}
 	}
 	set_input_mode();
