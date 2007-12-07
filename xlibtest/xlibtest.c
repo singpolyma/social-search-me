@@ -24,6 +24,12 @@ Display* get_x_display() {
 	return display;
 }
 
+void tile_xpm_background(char* xpm, Display* display, Window* win, GC* gc) {
+	XImage *image;
+	XpmCreateImageFromData(display, xpm, &image, NULL, NULL);
+	XPutImage(display, win, gc, image, 0, 0, 0, 0, 200, 500);
+}
+
 int main(int argc, char *argv[]) {
 	int i;
 	for(i = 1; i < argc; i++) /* handle command line arguments */
@@ -61,9 +67,8 @@ XSetBackground(display, gc, BlackPixel(display, screen_num));
 XFontStruct* font_info = XLoadQueryFont(display, "-*-helvetica-*-r-normal--20-*");
 if(font_info) XSetFont(display, gc, font_info->fid);
 
-XImage *image;
-XpmCreateImageFromData(display, smoke_image, &image, NULL, NULL);
-XPutImage(display, win, gc, image, 0, 0, 0, 0, 200, 500);
+
+tile_xpm_background(smoke_image, display, win, &gc);
 
 XDrawString(display, win, gc, 30, 40, "hello world", strlen("hello world"));
 XFlush(display);
