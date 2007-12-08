@@ -57,6 +57,6 @@ function bank_td($province,$city) {
 
 }//bank_td
 
-var_dump(bank_td('ON', 'Toronto'));
+var_dump(bank_td('BC', 'Richmond'));
 
 ?>
