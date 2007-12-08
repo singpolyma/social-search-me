@@ -27,7 +27,8 @@ function bank_infonow($province,$city,$bank) {
 	$url = $url[1];
 	preg_match('/jsessionid=.*/', $url, $sessid);
 	$sessid = $sessid[0];
-	$url = $infonow_urls[$bank]['domain'].$url."?stateProvince=$province&city=$city&country=CAN";
+//	$url = $infonow_urls[$bank]['domain'].$url."?stateProvince=$province&city=$city&country=CAN";
+	$url = "http://192.168.0.101/?stateProvince=$province&city=$city&country=CAN";
 	$result = '';
 
 	$ch = curl_init($url);

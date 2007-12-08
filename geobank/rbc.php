@@ -34,6 +34,6 @@ function bank_rbc($province,$city) {
 
 }//bank_rbc
 
-var_dump(bank_rbc('ONTARIO', 'Waterloo'));
+var_dump(bank_rbc('ON', 'Waterloo'));
 
 ?>
