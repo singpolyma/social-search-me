@@ -1,12 +1,28 @@
 <?php
 
-header('Content-type: text/plain');
+/*
+    td.php - TD Canada Trust web scraper for ABM Locator
+
+    Copyright (C) 2007  Stephen Paul Weber
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 function bank_td($province,$city) {
 
 	$rtrn = array();//return data in this
 
-	//get crap from bank
 	$ch = curl_init('https://tdbank.infonow.net/bin/findNow?CLIENT_ID=TD_BRANCH_CAN');
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER,TRUE);
 	$result = curl_exec($ch);
@@ -56,7 +72,5 @@ function bank_td($province,$city) {
 	return $rtrn;//return the data
 
 }//bank_td
-
-var_dump(bank_td('BC', 'Richmond'));
 
 ?>

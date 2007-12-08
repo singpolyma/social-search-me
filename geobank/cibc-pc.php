@@ -1,9 +1,25 @@
 <?php
 
-header('Content-type: text/plain');
+/*
+    cibc-pc.php - CIBC and PC Financial web scraper for ABM Locator
 
+    Copyright (C) 2007  Stephen Paul Weber
 
-function bank_infonow($province,$city,$bank) {
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+function bank_cibc_pc($province,$city,$bank) {
 
 	$infonow_urls = array();
 	$infonow_urls['cibc'] = array();
@@ -17,7 +33,6 @@ function bank_infonow($province,$city,$bank) {
 
 	$rtrn = array();//return data in this
 
-	//get crap from bank
 	$ch = curl_init($infonow_urls[$bank]['form']);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER,TRUE);
 	$result = curl_exec($ch);
@@ -32,7 +47,7 @@ function bank_infonow($province,$city,$bank) {
 
 	$ch = curl_init($url);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-//	curl_setopt($ch, CURLOPT_AUTOREFERER, TRUE);
+	//curl_setopt($ch, CURLOPT_AUTOREFERER, TRUE);
 	curl_setopt($ch, CURLOPT_REFERER, $url);
 	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
 	$result .= curl_exec($ch);
@@ -70,16 +85,6 @@ function bank_infonow($province,$city,$bank) {
 
 	return $rtrn;//return the data
 
-}//bank_infonow
-
-function bank_cibc($province, $city) {
-	return bank_infonow($province, $city, 'cibc');
-}//end bank_cibc
-
-function bank_pc($province, $city) {
-	return bank_infonow($province, $city, 'pc');
-}//end bank_pc
-
-var_dump(bank_pc('BC', 'Richmond'));
+}//bank_cibc_pc
 
 ?>

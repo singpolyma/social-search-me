@@ -1,12 +1,28 @@
 <?php
 
-header('Content-type: text/plain');
+/*
+    citizensbank.php - Citizens Bank web scraper for ABM Locator
 
-function bank_citizenbank($province,$city) {
+    Copyright (C) 2007  Stephen Paul Weber
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+function bank_citizensbank($province,$city) {
 
 	$rtrn = array();//return data in this
 
-	//get crap from bank
 	$ch = curl_init('https://www.citizensbank.ca/Personal/Products/BankAccounts/HowtoBankwithUs/ATMs/ATMLocations/');
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER,TRUE);
 	curl_setopt($ch, CURLOPT_POST, TRUE);
@@ -54,8 +70,6 @@ function bank_citizenbank($province,$city) {
 		$rtrn[] = array('address' => str_replace("\n",' ',$node->nodeValue));
 */
 
-}//bank_citizenbank
-
-var_dump(bank_citizenbank('ON', 'Waterloo'));
+}//bank_citizensbank
 
 ?>
