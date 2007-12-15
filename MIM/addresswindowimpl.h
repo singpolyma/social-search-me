@@ -67,6 +67,7 @@ public:
       connect(currencyBox, SIGNAL(currentIndexChanged(int)), this, SLOT(calculateSupport(int)));
       connect(addCategoryButton, SIGNAL(clicked()), this, SLOT(addCategory()));
       connect(deleteCategoryButton, SIGNAL(clicked()), this, SLOT(deleteCategory()));
+      connect(isOrganizationBox, SIGNAL(stateChanged(int)), this, SLOT(doOrganization(int)));
 
    }//end constructor
 
@@ -78,6 +79,8 @@ public slots:
    virtual void calculateSupport(int i);
    virtual void addCategory();
    virtual void deleteCategory();
+   virtual void doOrganization(int state);
+   virtual void doOrganization();
    
 protected:
    virtual void refreshCategories();

@@ -84,7 +84,7 @@ void MainWindowImpl::enterEvent(QEvent *event) {
 }//end printTest
 
 void MainWindowImpl::about() {
-	QMessageBox::about(this, tr("About MIM"), tr("<b>Work in progress.</b><br>Moving from MSAccess to Qt.<br>Versioning to be decided.<br>Dev stamp <b>1177706512</b><br><br><a href=\"http://mim.singpolyma.net/\">Project Website</a><br><a href=\"mailto:mim@singpolyma.net\">Email</a><br><br>Some icons from the <a href=\"http://famfamfam.com/lab/icons/silk/\">Silk icon set</a>"));
+	QMessageBox::about(this, tr("About MIM"), tr("<b>Work in progress.</b><br>Moving from MSAccess to Qt.<br>Pre-release 1.1197759106<br><br><a href=\"http://mim.singpolyma.net/\">Project Website</a><br><a href=\"mailto:mim@singpolyma.net\">Email</a><br><br>Some icons from the <a href=\"http://famfamfam.com/lab/icons/silk/\">Silk icon set</a>"));
 }//end about
 
 void importFinish(QStringList map, void* mainwindow, QSqlDatabase db) {
@@ -114,24 +114,28 @@ void importFinish(QStringList map, void* mainwindow, QSqlDatabase db) {
 
 void MainWindowImpl::import() {
 	qDebug("MainWindowImpl::import");
-	QSqlDatabase::registerSqlDriver( "SXWPLAIN", new QSqlDriverCreator<SxWPlainDriver> );
-//	QMessageBox::information(this, tr("Import..."), tr("The importer is a work in progress.  This implementation only works on CSV files."));
 	QString documentsPath = QDir::homePath();
 	if(QDir(QDir::homePath() + QDir::separator() + tr("Documents") + QDir::separator()).exists()) documentsPath = QDir::homePath() + QDir::separator() + tr("Documents") + QDir::separator();
 	if(QDir(QDir::homePath() + QDir::separator() + tr("My Documents") + QDir::separator()).exists()) documentsPath = QDir::homePath() + QDir::separator() + tr("My Documents") + QDir::separator();
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), documentsPath, tr("CSV Files (*.csv)"));
-	
+	import(fileName);
+}//end import()
+
+void MainWindowImpl::import(QString fileName) {
+	qDebug("MainWindowImpl::import(%s)", fileName.toAscii().data());
+	if(fileName == "") return;
+	QSqlDatabase::registerSqlDriver( "SXWPLAIN", new QSqlDriverCreator<SxWPlainDriver> );
 	QSqlDatabase db = QSqlDatabase::addDatabase("SXWPLAIN","import");
 	db.setDatabaseName(fileName);
 	if (!db.open()) {
-		 qFatal("SQL Driver not found");
+		 qDebug("SQL Driver not found");
 		 return;
 	}//end if ! db.open
 	QSqlQuery query(db);
 	if (!query.exec("select")) {
-		qFatal("Unable to perform Query");
+		qDebug("Unable to perform Query");
 		return;
 	}//end if ! query.exec
 	query.next();
 	(new SqlImportWindow(((SxWResult*)(query.result()))->record(),addressTable->record(0),&importFinish,(void*)this,db))->show();
-}//end import
+}//end import(fileName)

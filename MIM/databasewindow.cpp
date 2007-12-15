@@ -30,7 +30,8 @@ void DatabaseWindow::_init() {
 
 void DatabaseWindow::closeEvent(QCloseEvent *event) {
    qDebug("DatabaseWindow::closeEvent");
-   saveRecord();//save the current record, before closing
+	if(!isLocked())//if we can't edit, why save?
+		saveRecord();//save the current record, before closing
 }//end closeEvent
 
 /* RECORD NAVIGATION */
@@ -150,8 +151,8 @@ void DatabaseWindow::saveRecord() {
 			   box = findChild<QComboBox *>(field.name() + "Box");
 			   if(box != 0) {
 			      isNotBlank = isNotBlank || (((QComboBox *)box)->currentText() != "");
-			      isNotChanged = isNotChanged && (((QComboBox *)box)->currentText() == field.value().toString());
-//			      qDebug("[ComboBox (%s)] %s",field.name().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
+			      isNotChanged = isNotChanged && ((((QComboBox *)box)->currentText() == field.value().toString()) || field.value().toString() == "");
+//			      qDebug("[ComboBox (%s)] [%s] %s",field.name().toAscii().data(),((QComboBox *)box)->currentText().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
 				   currentRecord.setValue(field.name(), ((QComboBox *)box)->currentText());
 			   } else {
 			      box = findChild<QCheckBox *>(field.name() + "Box");
@@ -162,8 +163,8 @@ void DatabaseWindow::saveRecord() {
 				        currentRecord.setValue(field.name(), "1");
 				     }//end if Qt::Checked
 					  if(((QCheckBox *)box)->checkState() == Qt::Unchecked) {
-				        isNotChanged = isNotChanged && (field.value().toString() == "0");
-//				        qDebug("[Checkbox (%s)] %s",field.name().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
+				        isNotChanged = isNotChanged && (field.value().toString() == "0" || field.value().toString() == "");
+//				        qDebug("[Checkbox (%s)] [%s] %s",field.name().toAscii().data(),field.value().toString().toAscii().data(),isNotChanged ? "Not changed : true" : "Not changed : false");
 					     currentRecord.setValue(field.name(), "0");
 					  }//end if Qt::Unchecked
 					  if(((QCheckBox *)box)->checkState() == Qt::PartiallyChecked) {

@@ -46,14 +46,14 @@ public:
 		QComboBox *combo_tmp;
 		QLabel *label_tmp;
 		label_tmp = new QLabel(this);
-		label_tmp->setGeometry(QRect(10, 10, 100, 20));
+		label_tmp->setGeometry(QRect(10, 10, 200, 20));
 		label_tmp->setText("Imported Fields");
 		label_tmp = new QLabel(this);
 		label_tmp->setGeometry(QRect(200, 10, 100, 20));
 		label_tmp->setText("MIM Fields");
 		for(int i = 0; i < from.count(); i++) {
 			label_tmp = new QLabel(this);
-			label_tmp->setGeometry(QRect(10, 40 + (23*i), 100, 20));
+			label_tmp->setGeometry(QRect(10, 40 + (23*i), 200, 20));
 			label_tmp->setText(from.fieldName(i));
 			combo_tmp = new QComboBox(this);
 			combo_tmp->setObjectName(from.fieldName(i) + "Box");
@@ -71,6 +71,9 @@ public:
 		doneButton->setGeometry(QRect(200, 50 + (23*from.count()), 100, 20));
 		doneButton->setText(QApplication::translate("Import", "Done", 0, QApplication::UnicodeUTF8));
 		connect(doneButton, SIGNAL(clicked()), this, SLOT(done()));
+
+		setWindowIcon(QIcon(QString::fromUtf8(":/icons/MIM.png")));//should inherit from parent somehow... somehow this whole thing needs to be redone as a dialogue to fix all the hax
+		move(qApp->desktop()->screenGeometry(this).center().x() - (width()/2),qApp->desktop()->screenGeometry(this).center().y() - (height()/2));
 
 	}//end constructor
 
