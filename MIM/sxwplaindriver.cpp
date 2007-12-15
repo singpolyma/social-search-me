@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with Foobar; if not, write to the Free Software
+ * along with this application; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
@@ -108,7 +108,7 @@ QStringList SxWResult::row( int row ) {
           tmp = "";
           continue;
        }//end if !in_field && str.at(i) == "\""
-       if(!in_field) {//starting a new field and it does not start with "
+       if(!in_field && str.at(i) != ',') {//starting a new field and it does not start with "
           in_field = true;
           start_quote = false;
           tmp = str.at(i);
@@ -116,13 +116,16 @@ QStringList SxWResult::row( int row ) {
        }//end if ! in_field
        if(in_field && start_quote && str.at(i) == '\"' && str.at(i+1) == ',') {//if we are in a field that started with a quote and the next two characters are ",
           in_field = false;
+          start_quote = false;
           rtrn.append(tmp);
+          tmp = "";
           i++;//skip the , because we have dealt with it
           continue;
        }//end if in_field && start_quote && str.at(i) == "\"" && str.at(i+1) == ","
-       if(in_field && !start_quote && str.at(i) == ',') {//if we are in a field that did not start with a quote and have hit a comma
+       if(!start_quote && str.at(i) == ',') {//if we are in a field that did not start with a quote and have hit a comma
           in_field = false;
           rtrn.append(tmp);
+          tmp = "";
           continue;
        }//end if in_field && !start_quote && str.at(i) == ","
        tmp += str.at(i);
@@ -237,7 +240,7 @@ QSqlRecord SxWResult::record() {
    QSqlRecord rtrn;
    QSqlField fld;
    QStringList trow = row(at());
-   for(int i = 0; i < fieldNames.size(); i++) {
+   for(int i = 0; i < fieldNames.size() && i < trow.size(); i++) {
       fld = QSqlField(fieldNames.at(i), QVariant::String);
       fld.setValue(QVariant(trow.at(i)));
       rtrn.append(fld);

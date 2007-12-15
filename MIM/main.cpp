@@ -28,8 +28,7 @@ int main( int argc, char **argv )
 {
   QApplication app( argc, argv );
 
-  MainWindowImpl *mainwindow = new MainWindowImpl();
-  mainwindow->show();
+  (new MainWindowImpl())->show();
 
   return app.exec();
 }

@@ -2,10 +2,6 @@ multiple im field
 spouse stuff
 child stuff
 alternate addresses with swap
-importers - duplicate detection (based on fn), update, backsynch, merge, duplicate
+better importers - more formats, duplicate detection (based on fn), update, backsynch, merge, duplicate
 Mailing label customisation
-
-***MILESTONE***
-X Business checkbox changes sorting only - add company/organization field
-Basic importer
-Store data in file
+Business checkbox changes sorting only - add company/organization field

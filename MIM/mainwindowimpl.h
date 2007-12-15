@@ -50,7 +50,7 @@ public:
    QSqlDatabase db;//database link
 
    MainWindowImpl() : QMainWindow() {
-   
+
      QStringList args = qApp->arguments();
      if(args.contains("--help") || args.contains("\?") || args.contains("/?") || args.contains("-h")) {
         printf("\nMissionary Information Manager - pre-release.\nQt version %s\n\nSupported arguments:\n   --help     Displays this information.\n   --debug    Displays more obvious debug data.\n\n",qVersion());
@@ -68,7 +68,7 @@ public:
       move(qApp->desktop()->screenGeometry(this).center().x() - (width()/2),qApp->desktop()->screenGeometry(this).center().y() - height());
 
       db = QSqlDatabase::addDatabase("QSQLITE");//open database
-      db.setDatabaseName(":memory:");
+      db.setDatabaseName(QDir::homePath() + "/.mimdb");
       if (!db.open()) {
           qFatal("SQL Driver not found");
           qApp->exit(1);
@@ -76,21 +76,20 @@ public:
 
 	  
 	  /* DATABASE SETUP */
-QSqlQuery query;
-query.exec("CREATE TABLE Addresses (id INTEGER PRIMARY KEY, isOrganization INTEGER, title VARCHAR(5), firstName VARCHAR(20), lastName VARCHAR(20), organization VARCHAR(20), streetAddress VARCHAR(50), city VARCHAR(20), province VARCHAR(20), postalCode VARCHAR(10), country VARCHAR(20), spouseName VARCHAR(20), homePhone VARCHAR(11), workPhone VARCHAR(11), workExtension VARCHAR(3), fax VARCHAR(11), cellPhone VARCHAR(11), email VARCHAR(50), url VARCHAR(255), birthdate DATE, anniversary DATE, notes TEXT, support INTEGER, currency VARCHAR(3), period INTEGER)");
-for(int i = 0; i < 10; i++)
+		QSqlQuery query;
+		query.exec("CREATE TABLE IF NOT EXISTS Addresses (id INTEGER PRIMARY KEY, isOrganization INTEGER, title VARCHAR(5), firstName VARCHAR(20), lastName VARCHAR(20), organization VARCHAR(20), streetAddress VARCHAR(50), city VARCHAR(20), province VARCHAR(20), postalCode VARCHAR(10), country VARCHAR(20), spouseName VARCHAR(20), homePhone VARCHAR(11), workPhone VARCHAR(11), workExtension VARCHAR(3), fax VARCHAR(11), cellPhone VARCHAR(11), email VARCHAR(50), url VARCHAR(255), birthdate DATE, anniversary DATE, notes TEXT, support INTEGER, currency VARCHAR(3), period INTEGER)");
+/*for(int i = 0; i < 10; i++)
    query.exec("INSERT INTO Addresses values(null, 0, 'Mr.', 'Danny " + (new QVariant(i))->toString() + "', 'Young', '', '380 Louisa St.', 'Wako', 'BC', 'H2H 6J7', 'Canada', '', '', '', '', '', '', 'dude@place.net', 'http://example.com/', '', '', '', 1, 'CDN', 12)");
 query.exec("INSERT INTO Addresses values(null, 1, 'Mr.', 'Danny', 'Young', 'Building', '380 Louisa St.', 'Wako', 'BC', 'H2H 6J7', 'Canada', '', '', '', '', '', '', 'dude@place.net', 'http://example.com/', '', '', '', 1, 'CDN', 12)");
 query.exec("INSERT INTO Addresses values(null, 0, 'Mr.', 'Danny', 'Young', 'Building', '380 Louisa St.', 'Wako', 'BC', 'H2H 6J7', 'Canada', '', '', '', '', '', '', 'dude@place.net', 'http://example.com/', '', '', '', 1, 'CDN', 12)");
-//currencies
-//WARNING - SYMBOL IS USED AS PRIMARY KEY IN PROGRAM (IE, SYMBOL IS STORED IN ADDRESSES TABLE)
-query.exec("CREATE TABLE Currencies (id INTEGER PRIMARY KEY, symbol CHAR(3), value INTEGER)");
-query.exec("INSERT INTO Currencies values(null, 'CDN', 1)");
-query.exec("INSERT INTO Currencies values(null, 'USD', 1.3)");
-//tags
-query.exec("CREATE TABLE Addresses2Categories (id INTEGER PRIMARY KEY, category VARCHAR(20), address_id INTEGER)");
-query.exec("INSERT INTO Addresses2Categories values(null, 'financial supporter', 1)");
-query.exec("INSERT INTO Addresses2Categories values(null, 'newsletter', 2)");
+*/
+	//currencies
+	//WARNING - SYMBOL IS USED AS PRIMARY KEY IN PROGRAM (IE, SYMBOL IS STORED IN ADDRESSES TABLE)
+	query.exec("CREATE TABLE IF NOT EXISTS Currencies (id INTEGER PRIMARY KEY, symbol CHAR(3), value INTEGER)");
+	//tags
+	query.exec("CREATE TABLE IF NOT EXISTS  Addresses2Categories (id INTEGER PRIMARY KEY, category VARCHAR(20), address_id INTEGER)");
+//query.exec("INSERT INTO Addresses2Categories values(null, 'financial supporter', 1)");
+//query.exec("INSERT INTO Addresses2Categories values(null, 'newsletter', 2)");
 
       addressTable = new QSqlTableModel();
       addressTable->setTable("Addresses");
@@ -100,11 +99,20 @@ query.exec("INSERT INTO Addresses2Categories values(null, 'newsletter', 2)");
       addressTable->setSort(4,Qt::AscendingOrder);
       addressTable->setSort(3,Qt::AscendingOrder);
       addressTable->select();
+		if(addressTable->rowCount() < 1) {
+   		query.exec("INSERT INTO Addresses values(null, 0, '', 'MIM', 'Project', '', '', '', '', '', '', '', '', '', '', '', '', 'mim@singpolyma.net', 'http://mim.singpolyma.net/', '', '', '', 0, 'CDN', 0)");
+      	addressTable->select();
+		}//end if currencyTable->rowCount < 1
 	  
       currencyTable = new QSqlTableModel();
       currencyTable->setTable("Currencies");
 	   currencyTable->setEditStrategy(QSqlTableModel::OnManualSubmit);
       currencyTable->select();
+		if(currencyTable->rowCount() < 1) {
+			query.exec("INSERT INTO Currencies values(null, 'CDN', 1)");
+			query.exec("INSERT INTO Currencies values(null, 'USD', 1.3)");
+      	currencyTable->select();
+		}//end if currencyTable->rowCount < 1
       
       enterEvent(new QEvent(QEvent::None));
 
@@ -120,6 +128,7 @@ query.exec("INSERT INTO Addresses2Categories values(null, 'newsletter', 2)");
    }//end constructor
 
    virtual void closeEvent(QCloseEvent *event);
+	virtual QSqlTableModel* getAddressTable() {return addressTable;};
 
 protected slots:
    virtual AddressWindowImpl* viewAddressesWindow();
@@ -137,5 +146,4 @@ protected:
    virtual void enterEvent(QEvent *event);
 
 };
-
 #endif // MAINWINDOW_H
