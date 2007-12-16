@@ -81,7 +81,14 @@ void MainWindowImpl::enterEvent(QEvent *event) {
 		else
 			nameSelectBox->addItem(loopRecord.value("lastName").toString() + ", " + loopRecord.value("firstName").toString());
 	}//end for i < addressTable->rowCount()
-}//end printTest
+}//end enterEvent
+
+void MainWindowImpl::showEvent(QEvent *event) {
+	qDebug() << "MainWindowImpl::showEvent";
+	QStringList args = qApp->arguments();
+	int importIndex = args.indexOf(QRegExp("--import"));
+	if(importIndex != -1) import(args.at(importIndex+1));
+}//end showEvent
 
 void MainWindowImpl::about() {
 	QMessageBox::about(this, tr("About MIM"), tr("<b>Work in progress.</b><br>Moving from MSAccess to Qt.<br>Pre-release 1.1197759106<br><br><a href=\"http://mim.singpolyma.net/\">Project Website</a><br><a href=\"mailto:mim@singpolyma.net\">Email</a><br><br>Some icons from the <a href=\"http://famfamfam.com/lab/icons/silk/\">Silk icon set</a>"));
@@ -91,10 +98,10 @@ void importFinish(QStringList map, void* mainwindow, QSqlDatabase db) {
 	MainWindowImpl* mw = (MainWindowImpl*)mainwindow;
 	QSqlTableModel* addressTable = mw->getAddressTable();
 	QSqlQuery query(db);
-   if (!query.exec("select")) {
-      qFatal("Unable to perform Query");
-      return;
-   }//end if ! query.exec
+	if (!query.exec("select")) {
+		qFatal("Unable to perform Query");
+		return;
+	}//end if ! query.exec
 	QSqlRecord loopRecord;
 	QSqlRecord newRecord = addressTable->record(0);
 	while(query.next()) {
