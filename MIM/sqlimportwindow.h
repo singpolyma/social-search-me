@@ -34,13 +34,13 @@ class SqlImportWindow : public QWidget
   Q_OBJECT
 
 public:
-	SqlImportWindow(QSqlRecord from, QSqlRecord to, void(* importFinish)(QStringList,void*,QSqlDatabase), void* mw, QSqlDatabase db) : QWidget() {
+	SqlImportWindow(QWidget *parent, QSqlRecord from, QSqlRecord to, void(* importFinish)(QStringList,QWidget*,QSqlDatabase), QSqlDatabase db) : QWidget() {
 
 	  //from and to are records so that we can extract field names for mapping -- we don't do any actual importing here, just map the fields across
 	  
 		this->from = from;
 		this->importFinish = *importFinish;
-		this->mw = mw;
+		this->mw = parent;
 		this->db = db;
 	  
 		QComboBox *combo_tmp;
@@ -82,8 +82,8 @@ public slots:
 
 protected:
 	QSqlRecord from;
-	void (*importFinish)(QStringList, void*, QSqlDatabase);
-	void* mw;
+	void (*importFinish)(QStringList, QWidget*, QSqlDatabase);
+	QWidget* mw;
 	QSqlDatabase db;
 
 };

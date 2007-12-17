@@ -128,6 +128,7 @@ public:
 		currencyTable->select();
 		
 		enterEvent(new QEvent(QEvent::None));
+		showEvent(new QEvent(QEvent::None));
 
 		connect(viewAddressesButton, SIGNAL(clicked()), this, SLOT(viewAddressesWindow()));
 		connect(addAddressButton, SIGNAL(clicked()), this, SLOT(addAddresses()));

@@ -94,7 +94,7 @@ void MainWindowImpl::about() {
 	QMessageBox::about(this, tr("About MIM"), tr("<b>Work in progress.</b><br>Moving from MSAccess to Qt.<br>Pre-release 1.1197759106<br><br><a href=\"http://mim.singpolyma.net/\">Project Website</a><br><a href=\"mailto:mim@singpolyma.net\">Email</a><br><br>Some icons from the <a href=\"http://famfamfam.com/lab/icons/silk/\">Silk icon set</a>"));
 }//end about
 
-void importFinish(QStringList map, void* mainwindow, QSqlDatabase db) {
+void importFinish(QStringList map, QWidget* mainwindow, QSqlDatabase db) {
 	MainWindowImpl* mw = (MainWindowImpl*)mainwindow;
 	QSqlTableModel* addressTable = mw->getAddressTable();
 	QSqlQuery query(db);
@@ -144,5 +144,5 @@ void MainWindowImpl::import(QString fileName) {
 		return;
 	}//end if ! query.exec
 	query.next();
-	(new SqlImportWindow(((SxWResult*)(query.result()))->record(),addressTable->record(0),&importFinish,(void*)this,db))->show();
+	(new SqlImportWindow(this,((SxWResult*)(query.result()))->record(),addressTable->record(0),&importFinish,db))->show();
 }//end import(fileName)
