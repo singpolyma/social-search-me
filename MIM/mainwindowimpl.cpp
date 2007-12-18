@@ -54,7 +54,7 @@ void MainWindowImpl::f11() {
 	QTableView *views[tables.size()];
 	for(int i = 0; i < tables.size(); i++) {
 		tableA[i] = new QSqlTableModel();
-		tableA[i]->setTable(tables.at(i)	);
+		tableA[i]->setTable(tables.at(i));
 		tableA[i]->select();
 		views[i] = new QTableView;
 		views[i]->setModel(tableA[i]);
@@ -71,6 +71,8 @@ void MainWindowImpl::showMailingLabels() {
 void MainWindowImpl::enterEvent(QEvent *event) {
 //	qDebug() << "MainWindowImpl::enterEvent"; //do not display because it plays havoc with --debug
 	addressTable->select();
+	while(addressTable->canFetchMore())
+		addressTable->fetchMore();
 	nameSelectBox->clear();
 	QSqlRecord loopRecord;
 	nameSelectBox->addItem("- Contacts -");
@@ -95,6 +97,7 @@ void MainWindowImpl::about() {
 }//end about
 
 void importFinish(QStringList map, QWidget* mainwindow, QSqlDatabase db) {
+	qDebug() << "importFinish";
 	MainWindowImpl* mw = (MainWindowImpl*)mainwindow;
 	QSqlTableModel* addressTable = mw->getAddressTable();
 	QSqlQuery query(db);
@@ -107,11 +110,32 @@ void importFinish(QStringList map, QWidget* mainwindow, QSqlDatabase db) {
 	while(query.next()) {
 		newRecord.clearValues();
 		loopRecord = ((SxWResult*)(query.result()))->record();
-		QSqlField field;
+		QSqlField field, field2;
 		for(int i = 0; i < loopRecord.count(); i++) {
 			field = loopRecord.field(i);
-			if(map.at(i) != "[none]")
-				newRecord.setValue(map.at(i), field.value().toString());
+			if(map.at(i) != "[none]") {
+				field2 = newRecord.field(map.at(i));
+				if(field2.type() == QVariant::Bool || field2.type() == QVariant::Int) {
+					if(
+						field.value().toString().toLower() == "true" ||
+						field.value().toString().toLower() == "t"    ||
+						field.value().toString().toLower() == "yes"  ||
+						field.value().toString().toLower() == "y"
+						) {
+							newRecord.setValue(map.at(i), "1");
+					} else if(
+						field.value().toString().toLower() == "false" ||
+						field.value().toString().toLower() == "f"     ||
+						field.value().toString().toLower() == "no"    ||
+						field.value().toString().toLower() == "n"
+						) {
+							newRecord.setValue(map.at(i), "0");
+					} else {
+						if(field2.type() == QVariant::Bool) newRecord.setValue(map.at(i), "0");
+							else newRecord.setValue(map.at(i), field.value().toString());
+					}//end if-elses
+				} else newRecord.setValue(map.at(i), field.value().toString());
+			}//end if != [none]
 		}//end for
 		addressTable->insertRecord(-1, newRecord);
 	}//end while next

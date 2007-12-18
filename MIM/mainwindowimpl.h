@@ -116,10 +116,7 @@ public:
 		addressTable = new QSqlTableModel();
 		addressTable->setTable("Addresses");
 		addressTable->setEditStrategy(QSqlTableModel::OnManualSubmit);
-		addressTable->setSort(3,Qt::AscendingOrder);
 		addressTable->setSort(4,Qt::AscendingOrder);
-		addressTable->setSort(5,Qt::AscendingOrder);
-		addressTable->setSort(1,Qt::AscendingOrder);
 		addressTable->select();
 		
 		currencyTable = new QSqlTableModel();
