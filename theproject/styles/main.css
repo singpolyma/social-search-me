@@ -1,0 +1,30 @@
+html, body {
+	background-color: black;
+	color: red;
+	font-family: sans-serif;
+	padding: 0px;
+	margin: 0px;
+}
+body {
+	padding-top: 1em;
+	padding-left: 2em;
+	padding-right: 2em;
+}
+a, a:link, a:visited {
+	color: #900;
+	text-decoration: none;
+}
+a:hover, a:active {
+	background-color: #900;
+	color: black;
+}
+img {
+	border-width: 0px;
+}
+address {
+	font-style: normal;
+}
+h1 {
+	margin: 0px;
+	padding: 0px;
+}
