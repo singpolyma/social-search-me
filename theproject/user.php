@@ -25,6 +25,12 @@ WHERE user_id=".$this_user->getValue('userid')
 	
 	<body>
 	<?php	require_once dirname(__FILE__).'/include/visible_header.php'; ?>
+	<div style="float:right;">
+		<?php $openids=$this_user->getValue('openids'); $openid = urlencode($openids[0]);  ?>
+		<a href="https://pibb.com/me/<?php echo $openid; ?>">
+			<img src="https://pibb.com/images/pibb_me_medium.png" style="border-width:0px;" title="Chat at Pibb.com" />
+		</a>
+	</div>
 	<address class="vcard">
 		<img src="<?php echo htmlentities($this_user->getValue('photo')); ?>" alt="" class="photo" />
 		<span class="fn nickname"><?php echo htmlentities($this_user->getValue('nickname')); ?></span>
@@ -51,9 +57,11 @@ WHERE user_id=".$this_user->getValue('userid')
 	<?php
 			foreach($this_user->getValue('cities') as $city) {
 				echo '<li>';
-				echo ' Location: '.$city->getValue('id');
-				echo ' Population: '.$city->getValue('population');
-				echo ' Defense: '.(intval($city->getValue('defense'))+1);
+				if($city->getValue('name'))
+					echo htmlentities($city->getValue('name')).' / ';
+				echo ' Location: '.str_pad($city->getValue('id'),6,'0',STR_PAD_LEFT);
+				echo ' / Population: '.$city->getValue('population');
+				echo ' / Defense: '.(intval($city->getValue('defense'))+1);
 				echo ' - <a href="/server/'.$server->getID().'/attack/'.$city->getValue('id').'">attack/move</a>';
 				echo '</li>';
 			}//end foreach city

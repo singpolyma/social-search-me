@@ -28,3 +28,9 @@ h1 {
 	margin: 0px;
 	padding: 0px;
 }
+.won {
+	background-color: #300
+}
+.lost {
+	background-color: #333;
+}

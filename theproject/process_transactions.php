@@ -1,11 +1,15 @@
 <?php
 
+if(file_get_contents('transaction_lock') > time()-30) die;
+
+file_put_contents('transaction_lock',time());
+
 require_once dirname(__FILE__).'/include/connectDB.php';
 require_once dirname(__FILE__).'/include/city.php';
 require_once dirname(__FILE__).'/include/user.php';
 
 $time = time();
-$transactions = mysql_query("SELECT destination,unit_id,unit_count,user_id FROM server_unit_transaction WHERE eta < $time") or die(mysql_error());
+$transactions = mysql_query("SELECT server_id,destination,unit_id,unit_count,user_id FROM server_unit_transaction WHERE eta < $time") or die(mysql_error());
 while($transaction = mysql_fetch_assoc($transactions)) {
 	$city = new city($transaction['destination']);
 	if($city->getValue('user')->getValue('userid') == $transaction['user_id']) {//if this is a friendly transfer
@@ -32,7 +36,7 @@ while($transaction = mysql_fetch_assoc($transactions)) {
 
 		}//end foreach keys
 
-		$random_bound = ($ranged + $melee + $defense)/rand(1,6);
+		$random_bound = ($ranged + $melee + $defense)/rand(2,6);
 		$randomness = rand($random_bound*-1,$random_bound);
 		
 		$uranged = mysql_query("SELECT value FROM units_data WHERE unit_id=".$transaction['unit_id']." AND `key`='ranged_hit'") or die(mysql_error());
@@ -50,7 +54,7 @@ while($transaction = mysql_fetch_assoc($transactions)) {
 		$ranged_attack = $ranged + $randomness - $uranged;
 		$melee_attack = $melee + $randomness - $umelee;
 		$total_defense = $defense + $randomness - $udefense;
-		$attack_results = ($ranged_attack + $melee_attack) / $defense;
+		$attack_results = ($ranged_attack + $melee_attack) + $defense;
 
 		if($attack_results < 0) {//we only have to do something if the attacker made an impact
 			foreach($city->getKeys() as $key) {
@@ -66,12 +70,15 @@ while($transaction = mysql_fetch_assoc($transactions)) {
 		}//end if attack_results < 0
 
 		if($attack_results < 0) {//after destroying units the attacker still prevails, take city
-			mysql_query("UPDATE server_cities SET user_id=".$transaction['user_id']." WHERE city_id=".$transaction['destination'],$db) or die(mysql_error());
-			$city->setValue('unit_'.$transaction['unit_id'], $transaction['unit_count']/2);
-			$user = new user($transaction['user_id']);
+			$user = new user($transaction['user_id'],new server($transaction['server_id']));
 			$user->setValue('city_count', intval($user->getValue('city_count'))+1);
 			$city->getValue('user')->setValue('city_count', intval($city->getValue('user')->getValue('city_count'))-1);
+			mysql_query("UPDATE server_cities SET user_id=".$transaction['user_id']." WHERE city_id=".$transaction['destination'],$db) or die(mysql_error());
+			$lower_loss_bound = ($ranged+$melee) < $transaction['unit_count']/2 ? $ranged+$melee : $transaction['unit_count']/4;
+			$city->setValue('unit_'.$transaction['unit_id'], $transaction['unit_count']-rand(,$transaction['unit_count']/2));
 		}//end if attack_results < 0
+
+		mysql_query("INSERT INTO server_attack_results (server_id,destination,user_id,results,time) VALUES (".$transaction['server_id'].",".$transaction['destination'].",".$transaction['user_id'].",$attack_results,$time)",$db) or die(mysql_result());
 
 	}//end if-else user == user
 }//end while transaction
@@ -84,4 +91,6 @@ while($transaction = mysql_fetch_assoc($transactions)) {
 }//end while transaction
 mysql_query("DELETE FROM server_building_transaction WHERE eta < $time") or die(mysql_error());
 
-?>
+file_put_contents('transaction_lock',0);
+
+?>DONE

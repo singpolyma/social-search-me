@@ -6,17 +6,18 @@ require_once dirname(__FILE__).'/include/user.php';
 require_once dirname(__FILE__).'/include/invisible_header.php';
 
 if(!$LOGIN_DATA['user_id']) die('Please log in.');
-$current_user = new user($LOGIN_DATA['user_id']);
-
-$server = new server($_REQUEST['server_id']);
+if(!$server) $server = new server($_REQUEST['server_id']);
+$current_user = new user($LOGIN_DATA['user_id'], $server);
 $cities = preg_split('/[\s\+]+/',$_REQUEST['attack_id']);
 if($cities[0]) $tocity = new city($cities[0], $server);
 if($cities[1]) $fromcity = new city($cities[1], $server);
 
 if($_POST['attack_id']) {
    $message = $fromcity->initiate_transaction(intval($_POST['attack_id']), intval($_POST['attack_count']), intval($_POST['attack_destination']));
-	header('Location: '.dirname(dirname($_SERVER['SCRIPT_URI'])),true,303);
-	exit;
+	if(!$message) {
+		header('Location: '.dirname(dirname($_SERVER['SCRIPT_URI'])),true,303);
+		exit;
+	}
 }//end if POST attack_id
 
 ?>
@@ -42,10 +43,14 @@ if($_POST['attack_id']) {
 					$dbcities = mysql_query("SELECT user_id,city_id FROM server_cities WHERE server_id=".$server->getID()." ORDER BY user_id LIMIT 50",$db) or die(mysql_error());
 				}//end if-else fromcity
 				while($city = mysql_fetch_assoc($dbcities)) {
-					$user = new user($city['user_id']);
+					$user = new user($city['user_id'], $server);
 					$city = new city($city['city_id']);
 					echo '<li>';
-					echo '<a href="/server/'.$server->getID().'/attack/'.$city->getValue('id').'+'.$cities[1].'">Location: '.$city->getValue('id').'</a> Population: '.$city->getValue('population').' Defense: '.(intval($city->getValue('defense'))+1).' User: <a href="/server/'.$server->getID().'/user/'.$user->getValue('userid').'">'.htmlentities($user->getValue('nickname')).'</a>';
+					echo '<a href="/server/'.$server->getID().'/attack/'.$city->getValue('id').'+'.$cities[1].'">';
+					if($city->getValue('name')) echo htmlentities($city->getValue('name')).' / ';
+					echo 'Location: '.str_pad($city->getValue('id'),6,'0',STR_PAD_LEFT);
+					echo '</a>';
+					echo ' / Population: '.$city->getValue('population').' / Defense: '.(intval($city->getValue('defense'))+1).' / User: <a href="/server/'.$server->getID().'/user/'.$user->getValue('userid').'">'.htmlentities($user->getValue('nickname')).'</a>';
 					echo '</li>';
 				}//end while cities
 				echo '</ul>';
@@ -55,21 +60,26 @@ if($_POST['attack_id']) {
 				echo '<h2>Select a City to Attack/Move From</h2><ul>';
 				foreach($current_user->getValue('cities') as $city) {
 					echo '<li>';
-					echo '<a href="/server/'.$server->getID().'/attack/'.$cities[0].'+'.$city->getValue('id').'">Location: '.$city->getValue('id').'</a> Population: '.$city->getValue('population').' Defense: '.(intval($city->getValue('defense'))+1);
+					echo '<a href="/server/'.$server->getID().'/attack/'.$cities[0].'+'.$city->getValue('id').'">';
+					if($city->getValue('name'))
+						echo htmlentities($city->getValue('name')).' / ';
+					echo 'Location: '.$city->getValue('id');
+					echo '</a> / Population: '.$city->getValue('population').' / Defense: '.(intval($city->getValue('defense'))+1);
+					echo ' / Units: '.intval($city->unit_count());
 					echo '</li>';
 				}//end foreach cities
 				echo '</ul>';
 			}//end if ! fromcity
 
 			if($fromcity && $tocity) {
-		     $units = mysql_query("SELECT unit_id,name,cost FROM units WHERE server_id=1",$db) or die(mysql_query());
+		     $units = mysql_query("SELECT unit_id,name,cost FROM units WHERE server_id=".$server->getID(),$db) or die(mysql_query());
    		   while($unit = mysql_fetch_assoc($units)) {
 		         $unit_list .= "\t\t\t<li>";
    		      $unit_list .= htmlentities($unit['name']);
       		   $unit_list .= ' ('.intval($fromcity->getValue('unit_'.$unit['unit_id'])).')';
          		$unit_list .= '<form method="post" action="">';
 	         	$unit_list .= '   <input type="hidden" name="attack_id" value="'.$unit['unit_id'].'" />';
-	   	      $unit_list .= '   <input type="text" name="attack_count" value="Number to attack with" />';
+	   	      $unit_list .= '   <input type="text" name="attack_count" value="Number to attack with" onclick="this.value=\'\'" />';
    	   	   $unit_list .= '   <input type="hidden" name="attack_destination" value="'.$tocity->getValue('id').'" />';
       	   	$unit_list .= '   <input type="submit" value="Attack/Move" />';
 	      	   $unit_list .= '</form>';

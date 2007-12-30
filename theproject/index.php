@@ -23,7 +23,16 @@ if($pathparts[1] == 'server') {
 	require dirname(__FILE__).'/server.php';
 	exit;
 }//end if server
-
+if($pathparts[0] == 'leaders') {
+	$_REQUEST['server_id'] = $pathparts[1];
+	require dirname(__FILE__).'/leaders.php';
+	exit;
+}//end if server
+if($pathparts[0] == 'attacks') {
+	$_REQUEST['server_id'] = $pathparts[1];
+	require dirname(__FILE__).'/attacks.php';
+	exit;
+}//end if server
 
 require_once dirname(__FILE__).'/include/user.php';
 require_once dirname(__FILE__).'/include/server.php';

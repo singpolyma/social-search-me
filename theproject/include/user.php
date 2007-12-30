@@ -7,6 +7,7 @@
 		protected $userid;
 		protected $nickname;
 		protected $email;
+		protected $openids = array();
 		protected $photo;
 		protected $gold;
 		protected $city_count;
@@ -31,11 +32,15 @@
 				if($record['key'] == 'gold') $this->gold = $record['value'];
 				if($record['key'] == 'city_count') $this->city_count = $record['value'];
 			}//end while record
-			if($this->gold === NULL || $this->city_count === NULL) $this->setupNewUser();
-			$data = mysql_query("SELECT city_id FROM server_cities WHERE server_id=".$this->server->getID()." AND user_id=$this->userid") or die(mysql_error());
+			if($this->gold === NULL && $this->city_count === NULL) $this->setupNewUser();
+			$data = mysql_query("SELECT city_id FROM server_cities WHERE server_id=".$this->server->getID()." AND user_id=$this->userid ORDER BY city_id DESC") or die(mysql_error());
 			while($city = mysql_fetch_assoc($data)) {
 				$this->cities[] = new city($city['city_id'],$this->server,$this);
 			}//end while city 
+			$data = mysql_query("SELECT openid FROM openids WHERE user_id=$this->userid") or die(mysql_error());
+			while($openid = mysql_fetch_assoc($data)) {
+				$this->openids[] = $openid['openid'];
+			}//end while openid
 		}//end constructor
 		
 		function setupNewUser() {
@@ -43,8 +48,7 @@
 			require_once dirname(__FILE__).'/connectDB.php';
 			mysql_query("INSERT INTO server_data (server_id,user_id,`key`,value) VALUES (".$this->server->getID().",$this->userid,'gold',".$this->server->getInitialGold().")",$db) or die(mysql_error());
 			$this->gold = $this->server->getInitialGold();
-			mysql_query("INSERT INTO server_data (server_id,user_id,`key`,value) VALUES (".$this->server->getID().",$this->userid,'city_count',".$this->server->getInitialCityCount().")",$db) or die(mysql_error());
-			$this->city_count = $this->server->getInitialCityCount();
+			mysql_query("INSERT INTO server_data (server_id,user_id,`key`,value) VALUES (".$this->server->getID().",$this->userid,'city_count',0)",$db) or die(mysql_error());
 			for($i = 0; $i < $this->server->getInitialCityCount(); $i++) {
 				city::build_city($this, $this->server, false);
 			}//end for $i < $this->server->getInitialCities()
@@ -60,10 +64,9 @@
 		}//end function setValue
 		
 		function calculateDailyGold() {
-			$cities = intval($this->getValue('city_count'));
 			$dailyGold = 10;
 			foreach($this->getValue('cities') as $city)
-				$dailyGold += ($city->getValue('population')/10)*5;
+				$dailyGold += ($city->getValue('population')/10)*7;
 			return $dailyGold; 
 		}//end function calculateDailyGold
 		
@@ -75,9 +78,9 @@
 
 		function calculateScore() {
 			$score = 0;
-			$score += $this->gold/2;//two gold, one point
+			$score += ($this->gold + $this->calculateDailyGold())/17;//17 gold or income, one point
 			foreach($this->cities as $city) {
-				$score += $city->getValue('population')/5;//5 population, one point
+				$score += $city->getValue('population');//1 population, one point
 				foreach($city->getKeys() as $key) {//10 units, one point
 					$key2 = explode('_',$key);
 					if($key2[0] != 'unit' || !is_numeric($key2[1])) continue;
