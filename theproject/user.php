@@ -57,9 +57,13 @@ WHERE user_id=".$this_user->getValue('userid')
 	<?php
 			foreach($this_user->getValue('cities') as $city) {
 				echo '<li>';
+				$can_access = $city->getValue('user_'.$LOGIN_DATA['user_id'].'_access');
+				$can_access = ($can_access === true) || (intval($can_access) > time());
+				if($can_access) echo '<a href="/server/'.$server->getID().'/city/'.$city->getValue('id').'">';
 				if($city->getValue('name'))
 					echo htmlentities($city->getValue('name')).' / ';
 				echo ' Location: '.str_pad($city->getValue('id'),6,'0',STR_PAD_LEFT);
+				if($can_access) echo '</a>';
 				echo ' / Population: '.$city->getValue('population');
 				echo ' / Defense: '.(intval($city->getValue('defense'))+1);
 				echo ' - <a href="/server/'.$server->getID().'/attack/'.$city->getValue('id').'">attack/move</a>';

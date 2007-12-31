@@ -24,6 +24,10 @@
 			while($pair = mysql_fetch_assoc($data)) {//get all key=>value pairs for this type of building
 				$this->$pair['key'] = $pair['value'];
 			}//end while pair
+			$userstr = 'user_'.$this->user->getValue('userid').'_access';
+			$this->$userstr = true;
+			$userstr = 'user_'.$this->user->getValue('userid').'_edit';
+			$this->$userstr = true;
 		}//end constructor
 
 		function getValue($key) {return $this->$key;}

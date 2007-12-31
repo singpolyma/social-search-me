@@ -73,6 +73,7 @@ if($_POST['build_city']) {
 			echo $player->getValue('nickname') ? $player->getValue('nickname') : 'User #'.$player->getValue('userid');
 			echo '</a>';
 			echo ' ('.$player->getValue('gold').' Gold)';
+			echo $player->online_icon();
 			echo '</li>';
 		}//end while close_competitors
 		echo '</ol>';
@@ -91,6 +92,7 @@ if($_POST['build_city']) {
 				echo $player->getValue('nickname') ? $player->getValue('nickname') : 'User #'.$player->getValue('userid');
 				echo '</a>';
 				echo ' ('.$player->getValue('gold').' Gold)';
+				echo $player->online_icon();
 				echo '</li>';
 			}//end while close_competitors
 			echo '</ol>';

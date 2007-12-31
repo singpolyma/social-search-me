@@ -51,6 +51,9 @@ if($_POST['attack_id']) {
 					echo 'Location: '.str_pad($city->getValue('id'),6,'0',STR_PAD_LEFT);
 					echo '</a>';
 					echo ' / Population: '.$city->getValue('population').' / Defense: '.(intval($city->getValue('defense'))+1).' / User: <a href="/server/'.$server->getID().'/user/'.$user->getValue('userid').'">'.htmlentities($user->getValue('nickname')).'</a>';
+	            $can_access = $city->getValue('user_'.$LOGIN_DATA['user_id'].'_access');
+   	         $can_access = ($can_access === true) || (intval($can_access) > time());
+      	      if($can_access) echo ' - <a href="/server/'.$server->getID().'/city/'.$city->getValue('id').'">view</a>';
 					echo '</li>';
 				}//end while cities
 				echo '</ul>';

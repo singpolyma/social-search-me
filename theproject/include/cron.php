@@ -1,5 +1,12 @@
 <?php
 
+if($LOGIN_DATA['user_id'] && $_REQUEST['server_id']) {
+	require_once dirname(__FILE__).'/user.php';
+	require_once dirname(__FILE__).'/server.php';
+	$updateuser = new user($LOGIN_DATA['user_id'], new server($_REQUEST['server_id']));
+	$updateuser->setValue('last_online',time());
+}//end if user
+
 $argyle = @ fsockopen( $_SERVER['HTTP_HOST'], 80, $errno, $errstr, 0.01 );
 
 if ( $argyle )

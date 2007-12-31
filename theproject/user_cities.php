@@ -15,9 +15,9 @@
 				echo htmlentities($city->getValue('name')).' / ';
          echo 'Location: '.str_pad($city->getValue('id'), 6, '0', STR_PAD_LEFT);
          echo '</a>';
-         echo ' /  Population: '.$city->getValue('population');
-			echo ' /  Defense: '.(intval($city->getValue('defense'))+1);
-			echo ' /  Units: '.intval($city->unit_count());
+         echo ' / '.$city->getValue('population').' <img src="/images/group.png" alt="Population" title="Population" />';
+			echo ' / '.(intval($city->getValue('defense'))+1).' <img src="/images/shield.png" alt="Defense" title="Defense" />';
+			echo ' / '.intval($city->unit_count()).' <img src="/images/car.png" alt="Units" title="Units" />';
          $attack = mysql_query("SELECT user_id,unit_count,eta FROM server_unit_transaction WHERE server_id=".$server->getID()." AND destination=".$city->getValue('id')." AND user_id!=".$current_user->getValue('userid')." AND eta < ".(time()+60*5)." ORDER BY eta DESC LIMIT 1",$db) or die(mysql_error());
          $attack = mysql_fetch_assoc($attack);
          if($attack) {

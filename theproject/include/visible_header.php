@@ -6,16 +6,18 @@
 			require_once dirname(__FILE__).'/../statistics.php';
 			if($_REQUEST['server_id'] && !$server) $server = new server($_REQUEST['server_id']);
 			echo '</span>';
-			echo ' | <a href="'.($_REQUEST['server_id']?'/server/'.$_REQUEST['server_id']:'').'/user/'.$LOGIN_DATA['user_id'].'">Your Profile</a>';
-			echo ' | <a href="/login/out.php">Logout</a>';
+			echo ' | <a href="'.($_REQUEST['server_id']?'/server/'.$_REQUEST['server_id']:'').'/user/'.$LOGIN_DATA['user_id'].'"><img src="/images/user.png" alt="Your Profile" title="Your Profile" /></a> ';
+			echo ' &nbsp;  <a href="/login/out.php"><img src="/images/door_out.png" alt="Logout" title="Logout" /></a> ';
 		}//end if logged in
 		?>
-      | <a href="https://pibb.com/go/theproject">Discuss</a>
-      | <a href="/faq/">FAQ</a>
-		|
+      &nbsp; <a href="https://pibb.com/go/theproject"><img src="/images/comment.png" alt="Discuss" title="Discuss" /></a>
+      &nbsp; <a href="/faq/"><img src="/images/information.png" alt="FAQ" title="FAQ" /></a>
 		<br />
 		<?php
 			if($server) {
+				echo ' <span style="font-weight:bold;font-size:0.8em;" id="server-message">';
+				require_once dirname(__FILE__).'/../server-message.php';
+				echo '</span> &nbsp; &nbsp; &nbsp; ';
 				$day = $server->getPreviousDay();
 				$time_left = round(abs((time()-$server->getDayLength()) - $day)/60,2);
 				echo '<span id="day-left">'.$time_left.'</span> minutes left in the day';
@@ -37,9 +39,10 @@
 	      	   var statistics_id = '';
    		      function update_statistics() {
 	   	         new Ajax.Updater('statistics', '/statistics.php?server_id=<?php echo $server->getID(); ?>');
-      	   	   statistics_id = setTimeout("update_statistics()", 1000*10);
+	   	         new Ajax.Updater('server-message', '/server-message.php?server_id=<?php echo $server->getID(); ?>');
+      	   	   statistics_id = setTimeout("update_statistics()", 1000*8);
 	   	      }//end function update_day_left
-		         statistics_id = setTimeout("update_statistics()", 1000*10)
+		         statistics_id = setTimeout("update_statistics()", 1000*8)
 
 				//]]>
 				</script>

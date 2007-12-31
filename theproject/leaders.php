@@ -32,6 +32,7 @@ $current_user = new user($LOGIN_DATA['user_id'],$server);
 		krsort($leaders);
 		foreach($leaders as $score => $leader) {
 			echo '<li>';
+			echo $leader->online_icon().' ';
 			$nickname = $leader->getValue('nickname') ? $leader->getValue('nickname') : 'User #'.$leader->getValue('userid');
 			echo '<a href="/server/'.$server->getID().'/user/'.$leader->getValue('userid').'">'.htmlentities($nickname).'</a>';
 			echo ' (Score: '.$score.')';

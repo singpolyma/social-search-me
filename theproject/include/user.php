@@ -29,8 +29,7 @@
 			$this->photo = $data['photo'];
 			$data = mysql_query("SELECT `key`, value FROM server_data WHERE server_id=".$this->server->getID()." AND user_id=$userid") or die(mysql_error());
 			while($record = mysql_fetch_assoc($data)) {//loop over all returned records
-				if($record['key'] == 'gold') $this->gold = $record['value'];
-				if($record['key'] == 'city_count') $this->city_count = $record['value'];
+				$this->$record['key'] = $record['value'];
 			}//end while record
 			if($this->gold === NULL && $this->city_count === NULL) $this->setupNewUser();
 			$data = mysql_query("SELECT city_id FROM server_cities WHERE server_id=".$this->server->getID()." AND user_id=$this->userid ORDER BY city_id DESC") or die(mysql_error());
@@ -49,6 +48,7 @@
 			mysql_query("INSERT INTO server_data (server_id,user_id,`key`,value) VALUES (".$this->server->getID().",$this->userid,'gold',".$this->server->getInitialGold().")",$db) or die(mysql_error());
 			$this->gold = $this->server->getInitialGold();
 			mysql_query("INSERT INTO server_data (server_id,user_id,`key`,value) VALUES (".$this->server->getID().",$this->userid,'city_count',0)",$db) or die(mysql_error());
+			mysql_query("INSERT INTO server_data (server_id,user_id,`key`,value) VALUES (".$this->server->getID().",$this->userid,'last_online',0)",$db) or die(mysql_error());
 			for($i = 0; $i < $this->server->getInitialCityCount(); $i++) {
 				city::build_city($this, $this->server, false);
 			}//end for $i < $this->server->getInitialCities()
@@ -89,6 +89,15 @@
 			}//end foreach cities
 			return $score;
 		}//end function calculateScore
+
+		function online_icon() {
+         if(time()-$this->getValue('last_online') < 60*2)
+            echo ' <img src="/images/status_online.png" alt="[online]" />';
+         elseif(time()-$this->getValue('last_online') < 60*10)
+            echo ' <img src="/images/status_away.png" alt="[online]" />';
+         else
+            echo ' <img src="/images/status_offline.png" alt="[online]" />';
+		}//end function online_icon
 
 	}//end class user
 ?>
