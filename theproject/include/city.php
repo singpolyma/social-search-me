@@ -58,6 +58,7 @@
 		function initiate_transaction($unitid, $count, $destination) {
 			global $db;
 			require_once dirname(__FILE__).'/connectDB.php';
+			if($count < 1) return 'Cannot move less than one unit.';
 			if($this->getValue('unit_'.$unitid)-$count < 0) return 'Tried to move more units than were present.';
 			$this->setValue('unit_'.$unitid, -1*$count, true);
 			$unit = mysql_query("SELECT value FROM units_data WHERE unit_id=$unitid AND `key`='speed' LIMIT 1") or die(mysql_error());
@@ -112,6 +113,7 @@
 			while($pair = mysql_fetch_assoc($data)) {//get all key=>value pairs for this type of building
 				$this->setValue($pair['key'], $pair['value'], true);
 			}//end while pair
+			if($this->getValue('population') > $this->server->getCityPopulationMax()) $this->setValue('population', $this->server->getCityPopulationMax());
 		}//end function finish_build
 
 		static function build_city($user,$server,$dogold=true,$city_name='') {

@@ -23,7 +23,7 @@ if(!$server) $server = new server($_REQUEST['server_id']);
          $transactions = mysql_query("SELECT unit_count,eta FROM server_unit_transaction WHERE server_id=".$server->getID()." AND unit_id=".$unit['unit_id']." AND user_id=".$this_city->getValue('user')->getValue('userid')." AND destination=".$this_city->getValue('id')." ORDER BY eta DESC",$db) or die(mysql_query());
          while($transaction = mysql_fetch_assoc($transactions)) {
             $time_left = round(($transaction['eta']-time())/60,2);
-            if($tie_left < 0) $time_left = 0;
+            if($time_left < 0) $time_left = 0;
             $unit_transaction_list .= "\t\t\t".'<li>'.htmlentities($unit['name']).' ('.$transaction['unit_count'].') in '.$time_left.' minutes</li>'."\n";
          }//end while unit
       }//end while unit
@@ -33,7 +33,7 @@ if(!$server) $server = new server($_REQUEST['server_id']);
          $transactions = mysql_query("SELECT eta FROM server_building_transaction WHERE server_id=".$server->getID()." AND building_id=".$building['building_id']." AND user_id=".$this_city->getValue('user')->getValue('userid')." AND city_id=".$this_city->getValue('id')." ORDER BY eta DESC",$db) or die(mysql_query());
          while($transaction = mysql_fetch_assoc($transactions)) {
             $time_left = round(($transaction['eta']-time())/60,2);
-            if($tie_left < 0) $time_left = 0;
+            if($time_left < 0) $time_left = 0;
             $building_transaction_list .= "\t\t\t".'<li>'.htmlentities($building['name']).' in '.$time_left.' minutes</li>'."\n";
          }//end while unit
       }//end while building

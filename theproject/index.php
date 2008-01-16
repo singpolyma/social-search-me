@@ -28,6 +28,11 @@ if($pathparts[0] == 'leaders') {
 	require dirname(__FILE__).'/leaders.php';
 	exit;
 }//end if server
+if($pathparts[0] == 'rules') {
+	$_REQUEST['server_id'] = $pathparts[1];
+	require dirname(__FILE__).'/rules.php';
+	exit;
+}//end if server
 if($pathparts[0] == 'attacks') {
 	$_REQUEST['server_id'] = $pathparts[1];
 	require dirname(__FILE__).'/attacks.php';
@@ -67,6 +72,13 @@ require_once dirname(__FILE__).'/include/invisible_header.php';
 	 } else { ?>
 		 <?php require(dirname(__FILE__).'/login/form.php'); ?>
 	<?php } ?>
+
+<div style="text-align:center;">
+	<p>
+		The Project is a community-driven online strategy game.  One of the most unique features is the modular game engine, which enables admins to create servers that each have drastically different gameplay.  The Project is currently under heavy development.  Please report and bugs you find or request any features on <a href="http://pibb.com/go/theproject">our forums</a>.
+	</p>
+	<object style="border-width:0px;width:95%;height:450px;" data="/discuss.php" type="text/html"></object>
+</div>
 	 
 	</body>
 </html>

@@ -18,6 +18,7 @@ session_destroy();
 
 //unset cookie
 setcookie("user_openid",'',time()-3600,'/');
+setcookie("the_project_session",'',time()-3600,'/');
 
 header('Location: http://'.$_SERVER['HTTP_HOST'].dirname(dirname($_SERVER['PHP_SELF'])),true,303);//redirect to home
 

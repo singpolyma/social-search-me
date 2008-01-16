@@ -10,14 +10,14 @@
       echo "<h3>Cities</h3><ul>";
       foreach($current_user->getValue('cities') as $city) {
          echo '<li>';
-         echo '<a href="/server/'.$server->getID().'/city/'.$city->getValue('id').'">';
+         echo '  '.str_pad($city->getValue('population'),3,'0',STR_PAD_LEFT).' <img src="/images/group.png" alt="Population" title="Population" />';
+			echo '  '.str_pad((intval($city->getValue('defense'))+1),2,'0',STR_PAD_LEFT).' <img src="/images/shield.png" alt="Defense" title="Defense" />';
+			echo '  '.str_pad(intval($city->unit_count()),3,'0',STR_PAD_LEFT).' <img src="/images/car.png" alt="Units" title="Units" />';
+         echo '  <a href="/server/'.$server->getID().'/city/'.$city->getValue('id').'">';
+         echo ' @ '.str_pad($city->getValue('id'), 6, '0', STR_PAD_LEFT);
 			if($city->getValue('name'))
-				echo htmlentities($city->getValue('name')).' / ';
-         echo 'Location: '.str_pad($city->getValue('id'), 6, '0', STR_PAD_LEFT);
+				echo ' / '.htmlentities($city->getValue('name'));
          echo '</a>';
-         echo ' / '.$city->getValue('population').' <img src="/images/group.png" alt="Population" title="Population" />';
-			echo ' / '.(intval($city->getValue('defense'))+1).' <img src="/images/shield.png" alt="Defense" title="Defense" />';
-			echo ' / '.intval($city->unit_count()).' <img src="/images/car.png" alt="Units" title="Units" />';
          $attack = mysql_query("SELECT user_id,unit_count,eta FROM server_unit_transaction WHERE server_id=".$server->getID()." AND destination=".$city->getValue('id')." AND user_id!=".$current_user->getValue('userid')." AND eta < ".(time()+60*5)." ORDER BY eta DESC LIMIT 1",$db) or die(mysql_error());
          $attack = mysql_fetch_assoc($attack);
          if($attack) {

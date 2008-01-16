@@ -1,16 +1,20 @@
 <?php
 
+$timer = microtime(true);
+
 require_once dirname(__FILE__).'/include/user.php';
 require_once dirname(__FILE__).'/include/server.php';
+
 if(isset($_REQUEST['ajax']))
 	require_once dirname(__FILE__).'/include/processCookie.php';
 else
 	require_once dirname(__FILE__).'/include/invisible_header.php';
 require_once dirname(__FILE__).'/include/connectDB.php';
 
+$time = microtime(true);
 if(!$LOGIN_DATA['user_id']) die('<head><title>Please log in</title></head><body><h2>Please log in.</h2></body></html>');
 if(!$server) $server = new server($_REQUEST['server_id']);
-$current_user = new user($LOGIN_DATA['user_id'],$server);
+if(!$current_user) $current_user = new user($LOGIN_DATA['user_id'],$server);
 
 if($_POST['build_city']) {
 	if($_REQUEST['city_name'] == 'City Name (optional)') $_REQUEST['city_name'] = '';
@@ -62,8 +66,8 @@ if($_POST['build_city']) {
 		/* CLOSE COMPETITORS AND FRINEDS */
 		echo '<div style="position:absolute;top:6em;right:2em;background-color:black;padding-left:1em;">';
 		echo '<h3>Close Competitors</h3><ol style="list-style-type:none;padding:0px;">';
-		$gold_upper_bound = $current_user->getValue('gold') + 300;
-		$close_competitors = mysql_query("SELECT user_id,value+0 AS value FROM server_data WHERE server_id=".$server->getID()." AND `key`='gold' AND value < $gold_upper_bound ORDER BY value DESC LIMIT 10",$db) or die(mysql_error());
+		$rank_upper_bound = $current_user->getValue('rank') + 2;
+		$close_competitors = mysql_query("SELECT user_id,value+0 AS value FROM server_data WHERE server_id=".$server->getID()." AND `key`='rank' AND value < $rank_upper_bound ORDER BY value DESC LIMIT 5",$db) or die(mysql_error());
 		while($player = mysql_fetch_assoc($close_competitors)) {
 			if($player['user_id'] == $current_user->getValue('userid')) continue;
 			$player = new user($player['user_id'], $server);
@@ -119,6 +123,8 @@ if($_POST['build_city']) {
 		echo '<div id="troop-movements">';
 		require dirname(__FILE__).'/troop_movements.php';
 		echo '</div>';
+
+		echo '<!-- Page generated in '.(microtime(true)-$timer).'  seconds -->';
 
 	?>
 	

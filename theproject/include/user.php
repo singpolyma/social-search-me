@@ -9,6 +9,7 @@
 		protected $email;
 		protected $openids = array();
 		protected $photo;
+		protected $facebook_id;
 		protected $gold;
 		protected $city_count;
 		protected $cities = array();
@@ -21,12 +22,13 @@
 			if(!$userid) die('Need to pass user constructor a valid userid in user.php');
 			$this->userid = $userid;
 			require_once dirname(__FILE__).'/connectDB.php';
-			$data = mysql_query("SELECT nickname, email, photo FROM users WHERE user_id=$userid LIMIT 1") or die(mysql_error());
+			$data = mysql_query("SELECT nickname, email, photo, facebook_id FROM users WHERE user_id=$userid LIMIT 1") or die(mysql_error());
 			if(!$data || !count($data)) die('Need to pass user constructor a valid userid in user.php');
 			$data = mysql_fetch_assoc($data);
 			$this->nickname = $data['nickname'];
 			$this->email = $data['email'];
 			$this->photo = $data['photo'];
+			$this->facebook_id = $data['facebook_id'];
 			$data = mysql_query("SELECT `key`, value FROM server_data WHERE server_id=".$this->server->getID()." AND user_id=$userid") or die(mysql_error());
 			while($record = mysql_fetch_assoc($data)) {//loop over all returned records
 				$this->$record['key'] = $record['value'];
@@ -49,6 +51,7 @@
 			$this->gold = $this->server->getInitialGold();
 			mysql_query("INSERT INTO server_data (server_id,user_id,`key`,value) VALUES (".$this->server->getID().",$this->userid,'city_count',0)",$db) or die(mysql_error());
 			mysql_query("INSERT INTO server_data (server_id,user_id,`key`,value) VALUES (".$this->server->getID().",$this->userid,'last_online',0)",$db) or die(mysql_error());
+			mysql_query("INSERT INTO server_data (server_id,user_id,`key`,value) VALUES (".$this->server->getID().",$this->userid,'rank',0)",$db) or die(mysql_error());
 			for($i = 0; $i < $this->server->getInitialCityCount(); $i++) {
 				city::build_city($this, $this->server, false);
 			}//end for $i < $this->server->getInitialCities()
@@ -78,7 +81,7 @@
 
 		function calculateScore() {
 			$score = 0;
-			$score += ($this->gold + $this->calculateDailyGold())/17;//17 gold or income, one point
+			$score += ($this->gold + $this->calculateDailyGold())/20;//17 gold or income, one point
 			foreach($this->cities as $city) {
 				$score += $city->getValue('population');//1 population, one point
 				foreach($city->getKeys() as $key) {//10 units, one point
@@ -90,13 +93,33 @@
 			return $score;
 		}//end function calculateScore
 
+		function calculateRank() {
+			global $db;
+			require_once dirname(__FILE__).'/connectDB.php';
+			$close_players = mysql_query("SELECT user_id FROM server_data WHERE server_id=".$this->server->getID()." AND `key`='gold' ORDER BY value",$db) or die(mysql_error());
+			$leaders = array();
+			while($player = mysql_fetch_assoc($close_players)) {
+				$player_data = new user($player['user_id'], $this->server);
+				$leaders[$player_data->calculateScore()] = $player['user_id'];
+			}//end while close_players
+			krsort($leaders);
+			$c = 0;
+			foreach($leaders as $leader) {
+				$c++;
+				if($leader == $this->userid) {
+					$this->setValue('rank',$c);
+					return $c;
+				}//end if
+			}//end foreach
+		}//end function calculateRank
+
 		function online_icon() {
-         if(time()-$this->getValue('last_online') < 60*2)
-            echo ' <img src="/images/status_online.png" alt="[online]" />';
-         elseif(time()-$this->getValue('last_online') < 60*10)
-            echo ' <img src="/images/status_away.png" alt="[online]" />';
-         else
-            echo ' <img src="/images/status_offline.png" alt="[online]" />';
+			if(time()-$this->getValue('last_online') < 60*2)
+				echo ' <img src="/images/status_online.png" alt="[online]" />';
+			elseif(time()-$this->getValue('last_online') < 60*10)
+				echo ' <img src="/images/status_away.png" alt="[online]" />';
+			else
+				echo ' <img src="/images/status_offline.png" alt="[online]" />';
 		}//end function online_icon
 
 	}//end class user

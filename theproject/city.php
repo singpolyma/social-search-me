@@ -1,6 +1,9 @@
 <?php
 require_once dirname(__FILE__).'/include/city.php';
-require_once dirname(__FILE__).'/include/invisible_header.php';
+if(isset($_REQUEST['ajax']))
+	require_once dirname(__FILE__).'/include/processCookie.php';
+else
+	require_once dirname(__FILE__).'/include/invisible_header.php';
 
 if(!$LOGIN_DATA['user_id']) die('<head><title>Please Log in</title></head><body><h2>Please log in.</h2></body></html>');
 
@@ -18,10 +21,16 @@ $server = new server($_REQUEST['server_id']);
 
 if($can_edit && $_POST['building_id']) {
 	$message = $this_city->build(intval($_POST['building_id']));
+	if($message) $message = '<b style="padding:3px;border:1px solid red;display:block;"><img src="/images/error.png" alt="" /> '.htmlentities($message).'</b>';
+		else $message = '<div style="padding:3px;border:1px solid #ccc;display:block;"><img src="/images/information.png" alt="" /> Building started.</div>';
+	if(isset($_REQUEST['ajax'])) exit($message);
 }//end if POST building_id
 
 if($can_edit && $_POST['unit_id']) {
 	$message = $this_city->create_units(intval($_POST['unit_id']), intval($_POST['unit_count']));
+	if($message) $message = '<b style="padding:3px;border:1px solid red;display:block;"><img src="/images/error.png" alt="" /> '.htmlentities($message).'</b>';
+		else $message = '<div style="padding:3px;border:1px solid #ccc;display:block;"><img src="/images/information.png" alt="" /> Units started.</div>';
+	if(isset($_REQUEST['ajax'])) exit($message);
 }//end if POST unit_id
 
 ?>
@@ -36,6 +45,9 @@ if($can_edit && $_POST['unit_id']) {
          var city_transaction_id = '';
          function update_city_transactions() {
             new Ajax.Updater('city-transactions', '/city_transactions.php?city_id=<?php echo $this_city->getValue('id'); ?>&server_id=<?php echo $server->getID(); ?>');
+            new Ajax.Updater('units', '/city_units.php?city_id=<?php echo $this_city->getValue('id'); ?>&server_id=<?php echo $server->getID(); ?>');
+            new Ajax.Updater('buildings', '/city_buildings.php?city_id=<?php echo $this_city->getValue('id'); ?>&server_id=<?php echo $server->getID(); ?>');
+            new Ajax.Updater('stats', '/city_stats.php?city_id=<?php echo $this_city->getValue('id'); ?>&server_id=<?php echo $server->getID(); ?>');
             city_transaction_id = setTimeout("update_city_transactions()", 1000*10);
          }//end function update_day_left
          city_transaction_id = setTimeout("update_city_transactions()", 1000*10)
@@ -45,55 +57,24 @@ if($can_edit && $_POST['unit_id']) {
 	
 	<body>
 	<?php require_once dirname(__FILE__).'/include/visible_header.php';
-
-		if($message) echo '<b style="padding:3px;border:1px solid red;display:block;"><img src="/images/error.png" alt="" /> '.htmlentities($message).'</b>';
-
-		$units = mysql_query("SELECT unit_id,name,description,cost FROM units WHERE server_id=".$server->getID(),$db) or die(mysql_query());
-		while($unit = mysql_fetch_assoc($units)) {
-			$unit_options .= "\t\t\t".'<option value="'.$unit['unit_id'].'">'.htmlentities($unit['name']).' ('.$unit['cost'].' Gold)</option>'."\n";
-
-			$unit_list .= "\t\t\t<li>";
-			$unit_list .= htmlentities($unit['name']);
-			$unit_list .= ' ('.intval($this_city->getValue('unit_'.$unit['unit_id'])).')';
-			if($unit['description'])
-				$unit_list .= ' - '.htmlentities($unit['description']);
-			$unit_list .= "</li>\n";
-		}//end while unit
-
-		$buildings = mysql_query("SELECT building_id,name,description,cost FROM buildings WHERE server_id=".$server->getID(),$db) or die(mysql_query());
-		while($building = mysql_fetch_assoc($buildings)) {
-			$building_list .= "\t\t\t".'<li>';
-			$building_list .= htmlentities($building['name']);
-			$building_list .= ' ('.intval($this_city->getValue($building['building_id'])).')';
-			if($building['description'])
-				$building_list .= ' - '.htmlentities($building['description']);
-			$building_list .= '</li>'."\n";
-			$building_options .= "\t\t\t".'<option value="'.$building['building_id'].'">'.htmlentities($building['name']).' ('.$building['cost'].' Gold)</option>'."\n";
-		}//end while building
-
-		echo '<h3>';
-		if($this_city->getValue('name'))
-			echo htmlentities($this_city->getValue('name')).' ';
-		echo '(Location: '.$this_city->getValue('id').')</h3>';
-		if($can_access_time > 0) echo '<b>Can access this page for '.$can_access_time.' more minutes.</b>';
-		if($can_edit_time > 0) echo '<b>Can edit this page for '.$can_edit_time.' more minutes.</b>';
-		foreach($this_city->getKeys() as $key) {
-			$key2 = explode('_',$key);
-			if($key == 'id' || $key == 'name' || $key == 'server' || $key == 'user' || is_numeric($key) || $key2[0] == 'user' || ($key2[0] == 'unit' && is_numeric($key2[1]))) continue;
-			$label = ucwords(str_replace('_',' ',$key));
-			echo '<div>'.$label.': '.$this_city->getValue($key).'</div>';
-		}//end foreach key
-
+		echo '<div id="ajax-response" style="text-align:center;font-size:1.3em;">';
+		if($message) echo $message; 
+		echo '</div>';
 	?>
+
+	<div id="stats">
+		<?php require_once dirname(__FILE__).'/city_stats.php'; ?>
+	</div>
+
 	<div id="city-transactions" style="float:right;">
 		<?php require dirname(__FILE__).'/city_transactions.php'; ?>
 	</div>
-	<h3>Units</h3>
-	<ul>
-		<?php echo $unit_list; ?>
-	</ul>
+
+	<div id="units">
+		<?php require_once dirname(__FILE__).'/city_units.php'; ?>
+	</div>
 	<?php if($can_edit) : ?>
-	<form method="post" action="">
+	<form method="post" action="" onsubmit="dofrm(this,'&lt;div style=&quot;padding:3px;border:1px solid #ccc;display:block;&quot;&gt;&lt;img src=&quot;/images/information.png&quot; alt=&quot;&quot; /&gt; Training...&lt;/div&gt;'); return false;">
 		<select id="unit_id" name="unit_id">
 			<?php echo $unit_options ?>
 		</select>
@@ -101,14 +82,14 @@ if($can_edit && $_POST['unit_id']) {
 		<input type="submit" value="Train" />
 	</form>
 	<?php endif; ?>
+
 	<a href="/server/<?php echo $server->getID(); ?>/attack/+<?php echo $this_city->getValue('id'); ?>">attack/move</a>
 	
-	<h3>Buildings</h3>
-	<ul>
-		<?php echo $building_list;  ?>
-	</ul>
+	<div id="buildings">
+		<?php require_once dirname(__FILE__).'/city_buildings.php';  ?>
+	</div>
 	<?php if($can_edit) : ?>
-	<form method="post" action="">
+	<form method="post" action="" onsubmit="dofrm(this,'&lt;div style=&quot;padding:3px;border:1px solid #ccc;display:block;&quot;&gt;&lt;img src=&quot;/images/information.png&quot; alt=&quot;&quot; /&gt; Building...&lt;/div&gt;'); return false;">
 		<select id="building_id" name="building_id">
 			<?php echo $building_options ?>
 		</select>
