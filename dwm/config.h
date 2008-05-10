@@ -15,13 +15,14 @@
 const char *tags[] = { "www", "term", "chat", "misc", "5", "6", "7", "8", "media" };
 static Rule rules[] = {
 	/* class:instance:title regex	tags regex	isfloating */
-	{ "Gimp",					NULL,	   	True },
+	{ "Gimp",					NULL,			True },
 	{ "Network Settings",	NULL, 		True },
-	{ "gksu",            	NULL,	   	True },
-	{ "System Monitor",  	NULL,	   	True },
+	{ "gksu",					NULL,			True },
+	{ "System Monitor",  	NULL,			True },
 	{ "MPlayer",				"media",		True },
 	{ "Rhythmbox",				"media",		False },
 	{ "cmus",					"media",		False },
+	{ "mediacentre",			"media",		False },
 	{ "totem",					"media",		False },
 	{ "Firefox",				"www",		False },
 	{ "Flock",					"www",		False },
@@ -54,24 +55,24 @@ Layout layouts[] = {
 #define KEYS \
 Key keys[] = { \
 	/* modifier			key		function	argument */ \
-	{ MODKEY|ShiftMask,		XK_Return,	spawn,		"exec urxvt" }, \
+	{ MODKEY|ShiftMask,			XK_Return,	spawn,		"exec urxvt" }, \
 	{ MODKEY|ControlMask,		XK_Return,	spawn,		"exec urxvt -e pdmenu -c -u" }, \
-	{ MODKEY|ControlMask,   	XK_space,   	spawn,		"dmenu_path | dmenu | history-exec" }, \
+	{ MODKEY|ControlMask,		XK_space,		spawn,		"dmenu_path | dmenu | history-exec" }, \
 	{ MODKEY|ControlMask|ShiftMask, XK_space,	spawn, 		"lsw -visible | dmenu" }, \
-	{ MODKEY|ControlMask,   	XK_y, 		spawn, 		"echo \"y `echo \"- uwace\n- jobmine\n- quest\" | dmenu`\" | history-exec" }, \
-	{ 0,			   	XK_F4,		spawn, 		"exec rxvt" }, \
-	{ 0,			   	XK_F5,		spawn, 		"thunar ~/" }, \
-	{ 0,			   	XK_F6,		spawn, 		"exec urxvt -name cmus -e cmus" }, \
-	{ MODKEY,		   	XK_F6,		spawn, 		"rhythmbox" }, \
-	{ 0,			   	XK_F7,		spawn, 		"flock" }, \
+	{ MODKEY|ControlMask,		XK_y,			spawn, 		"echo \"y `echo \"- uwace\n- jobmine\n- quest\" | dmenu`\" | history-exec" }, \
+	{ 0,					XK_F4,		spawn, 		"exec rxvt" }, \
+	{ 0,					XK_F5,		spawn, 		"thunar ~/" }, \
+	{ 0,					XK_F6,		spawn, 		"exec urxvt -name cmus -e cmus" }, \
+	{ MODKEY,			XK_F6,		spawn, 		"exec urxvt -name mediacentre -e ssh mediacentre" }, \
+	{ 0,					XK_F7,		spawn, 		"flock" }, \
 	{ MODKEY,			XK_F7,		spawn, 		"psi" }, \
 	{ MODKEY|ControlMask,		XK_n,		spawn, 		"gksu network-admin" }, \
-	{ MODKEY|ControlMask,   	XK_l,		spawn, 		"sleep 0.1 && slock" }, \
-	{ MODKEY|ControlMask,   	XK_Delete,	spawn, 		"sudo shutdown now -h" }, \
+	{ MODKEY|ControlMask,		XK_l,		spawn, 		"sleep 0.1 && slock" }, \
+	{ MODKEY|ControlMask,		XK_Delete,	spawn, 		"sudo shutdown now -h" }, \
 	{ MODKEY,			XK_space,	setlayout,	NULL }, \
 	{ MODKEY,			XK_b,		togglebar,	NULL }, \
 	{ MODKEY,			XK_Tab,		focusprev,	NULL }, \
-	{ MODKEY,			XK_Tab,		zoom,    	NULL }, \
+	{ MODKEY,			XK_Tab,		zoom,	 	NULL }, \
 	{ MODKEY,			XK_j,		focusnext,	NULL }, \
 	{ MODKEY,			XK_k,		focusprev,	NULL }, \
 	{ MODKEY,			XK_h,		setmwfact,	"-0.05" }, \

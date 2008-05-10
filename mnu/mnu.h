@@ -11,7 +11,7 @@
 #define FALSE 0
 #define TRUE 1
 #define DYNAMIC_STRUCT(v) if((v = malloc(sizeof(*v))) == NULL) eprint("Memory allocation error.\n");
-#define DYNAMIC_STRING(o,i) if((o = malloc(strlen(i))) == NULL) eprint("Memory allocation error.\n");
+#define DYNAMIC_STRING(o,i) if((o = malloc(strlen(i+1))) == NULL) eprint("Memory allocation error.\n");
 #define DYNAMIC_STRING_COPY(o,i) DYNAMIC_STRING(o,i); strcpy(o,i);
 
 /* TYPES */

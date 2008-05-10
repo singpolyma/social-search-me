@@ -64,38 +64,53 @@ void parse_desktop_file(char *path, BOOL acat) {
 }
 
 char** get_xdg_data_dirs() {
-	char *tmp, *xdg_env = getenv("XDG_DATA_DIRS"), **xdg_data_dirs;
-	if((xdg_data_dirs = calloc(MAX_XDG_DATA_DIRS,sizeof(char*))) == NULL) eprint("Memory allocation error.\n");
-        if(!xdg_env || !xdg_env[0]) {/* if there in no envirenment variable, set defaults */
-                xdg_data_dirs[0] = "/usr/local/share/applications/";
-                xdg_data_dirs[1] = "/usr/share/applications/";
-        } else {/* otherwise, parse environment variable */
-                int i = 0;
-                tmp = strtok(xdg_env,":");/* Start tokenization */
-                while (tmp != NULL && i < MAX_XDG_DATA_DIRS) {/* while there is a token and we have not exceeded our directory scan maximum */
-                        xdg_data_dirs[i] = strcat(tmp,"applications/");/* data_dir is this token + applications/ */
-                        tmp = strtok(NULL,":");/* Get next token */
-                        i++;
+	char *tmp, **xdg_data_dirs;
+	char *xdg_env = getenv("XDG_DATA_DIRS");
+	int i = 0;
+
+	if(xdg_data_dirs = malloc(3 * sizeof *xdg_data_dirs) == NULL) eprint("Memory allocation error.\n");
+
+   if(!xdg_env || !xdg_env[0]) {/* if there in no environment variable, set defaults */
+		i = 2;
+   	DYNAMIC_STRING_COPY(xdg_data_dirs[0], "/usr/local/share/applications/");
+   	DYNAMIC_STRING_COPY(xdg_data_dirs[1], "/usr/share/applications/");
+   } else {/* otherwise, parse environment variable */
+      int max = 3;
+		/* TODO: can change getenv string or must copy ? */
+		for(tmp=strtok(xdg_env,":"); tmp; tmp=strtok(NULL,":")) {
+			if(i+1 == max) {/* allocate more memory */
+				void *t = realloc(xdg_data_dirs, 2 * max * sizeof *xdg_data_dirs);
+				if(!t) eprint("Memory allocation error.\n");
+				max = max * 2;
+				xdg_data_dirs = t;
+			}/* end if max */
+			xdg_data_dirs[i] = malloc(strlen(tmp) + strlen("applications/") + 1);
+			strcpy(xdg_data_dirs[i],tmp);
+			strcat(xdg_data_dirs[i], "applications/");
+			i++;
 		}
-	}
+	}/* if ! xdg_env */
+
+	xdg_data_dirs[i] = NULL;
+
+	return xdg_data_dirs;
 }
 
 void read_xdg_menu(BOOL acat) {
-	/* TODO: come up with a way to not put items on main categories if they hasAdditionalCategory, simply not displaying fails because the list is still being traversed */
+/* TODO: come up with a way to not put items on main categories if they hasAdditionalCategory, simply not displaying fails because the list is still being traversed */
 	int i, i2, fileCount;
 	struct direct **files;
 	char tmp[255], **xdg_data_dirs;
 	xdg_data_dirs = get_xdg_data_dirs();
-        for(i = 0; i < MAX_XDG_DATA_DIRS; i++) {
-                if(xdg_data_dirs[i] == NULL || !xdg_data_dirs[i][0]) continue;
-                fileCount = scandir(xdg_data_dirs[i], &files, (void*)file_select, alphasort);
-                for(i2 = fileCount-1; i2 > 0; i2--) {
-                        strcpy(tmp,xdg_data_dirs[i]);
-                        strcat(tmp,files[i2]->d_name);
-                        parse_desktop_file(tmp,acat);
-                }
-        }
-        free(files);
+	for(i = 0; xdg_data_dirs[i] != NULL; i++) {
+		 fileCount = scandir(xdg_data_dirs[i], &files, (void*)file_select, alphasort);
+		 for(i2 = fileCount-1; i2 > 0; i2--) {
+				strcpy(tmp,xdg_data_dirs[i]);
+				strcat(tmp,files[i2]->d_name);
+				parse_desktop_file(tmp,acat);
+		 }
+	}
+	free(files);
 	free(xdg_data_dirs);
 }
 
