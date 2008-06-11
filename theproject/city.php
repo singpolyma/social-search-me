@@ -15,7 +15,7 @@ if($can_edit !== true && intval($can_edit) > time()) $can_edit_time = ceil(($can
 $can_access = $this_city->getValue('user_'.$LOGIN_DATA['user_id'].'_access');
 if($can_access !== true && intval($can_access) > time()) $can_access_time = ceil(($can_access - time())/60);
 $can_access = ($can_access === true) || (intval($can_access) > time());
-if(!$can_access) die('<head><title>Cannot View City</title></head><body><h2>You cannot view this city.</h2></body></html>');
+//if(!$can_access) die('<head><title>Cannot View City</title></head><body><h2>You cannot view this city.</h2></body></html>');
 
 $server = new server($_REQUEST['server_id']);
 
@@ -35,7 +35,7 @@ if($can_edit && $_POST['unit_id']) {
 
 ?>
 	<head>
-		<title>The Project - Manage City @ <?php echo htmlentities($_REQUEST['city_id']); ?></title>
+		<title>The Project - City @ <?php echo htmlentities($_REQUEST['city_id']); ?></title>
 		<?php $xhtmlSite->metaType(); ?>
 		<link rel="stylesheet" href="/styles/main.css" type="text/css" media="screen" />
       <script type="text/javascript" src="/include/prototype.js"></script>
@@ -83,7 +83,7 @@ if($can_edit && $_POST['unit_id']) {
 	</form>
 	<?php endif; ?>
 
-	<a href="/server/<?php echo $server->getID(); ?>/attack/+<?php echo $this_city->getValue('id'); ?>">attack/move</a>
+	<a href="/server/<?php echo $server->getID(); ?>/attack/<?php if($can_access) echo '+'; ?><?php echo $this_city->getValue('id'); ?>">attack/move</a>
 	
 	<div id="buildings">
 		<?php require_once dirname(__FILE__).'/city_buildings.php';  ?>

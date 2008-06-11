@@ -52,8 +52,22 @@
 		function reset() {
 			global $db;
 			require_once dirname(__FILE__).'/connectDB.php';
+			require_once dirname(__FILE__).'/user.php';
 			$today = date('d');
 			$startdate = strtotime(date('Y-m-').($today+1));
+			
+			require_once dirname(__FILE__).'/twitter.php';
+			post_tweet('Server '.$this->getName().' restarted.  New Round begins '.date('Y-m-d H:i O',$startdate).'. http://t.heproject.com/server/'.$this->getID());
+			$players = mysql_query("SELECT user_id FROM server_data WHERE server_id=".$this->getID()." AND `key`='gold'",$db) or die(mysql_error());
+			while($player = mysql_fetch_assoc($players)) {
+				$player_data = new user($player['user_id'], $this, true);
+				if($player_data->getValue('twitter')) {
+					//send_tweet($player_data->getValue('twitter'), 'Server '.$this->getName().' restarted.  New Round begins '.date('Y-m-d H:i',$startdate));
+				} else if($player_data->getValue('email')) {
+					mail($player_data->getValue('email'), '[The Project] Server '.$this->getName().' restarted', ' New Round begins '.date('Y-m-d H:i O',$startdate).".\n\n <http://t.heproject.com/server/".$this->getID().'>', 'From: t@heproject.com');
+				}
+			}
+
 			mysql_query("UPDATE servers SET previous_week=".$startdate.", previous_day=".$startdate."  WHERE server_id=$this->id",$db) or die(mysql_error());
 			mysql_query("DELETE FROM server_data WHERE server_id=$this->id",$db) or die(mysql_error());
 			mysql_query("DELETE FROM server_cities WHERE server_id=$this->id",$db) or die(mysql_error());

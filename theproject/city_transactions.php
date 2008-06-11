@@ -13,10 +13,10 @@ if($can_edit !== true && intval($can_edit) > time()) $can_edit_time = ceil(($can
 $can_access = $this_city->getValue('user_'.$LOGIN_DATA['user_id'].'_access');
 if($can_access !== true && intval($can_access) > time()) $can_access_time = ceil(($can_access - time())/60);
 $can_access = ($can_access === true) || (intval($can_access) > time());
-if(!$can_access) die('<head><title>Cannot View City</title></head><body><h2>You cannot view this city.</h2></body></html>');
 
+if($can_access) {
 
-if(!$server) $server = new server($_REQUEST['server_id']);
+	if(!$server) $server = new server($_REQUEST['server_id']);
 
       $units = mysql_query("SELECT unit_id,name,cost FROM units WHERE server_id=".$server->getID(),$db) or die(mysql_query());
       while($unit = mysql_fetch_assoc($units)) {
@@ -46,3 +46,7 @@ if(!$server) $server = new server($_REQUEST['server_id']);
       <ol>
       <?php echo $building_transaction_list; ?>
       </ol>
+
+<?php
+} //end if can_access
+?>

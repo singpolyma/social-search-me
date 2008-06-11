@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__FILE__).'/twitter.php';
+
 class unit_functions {
 
 	static function attack($transaction,$city,$db) {
@@ -75,6 +77,8 @@ class unit_functions {
 		$city_link .= $city->getValue('name') ? mysql_real_escape_string($city->getValue('name'),$db) : 'City at '.$city->getValue('id');
 		if($class == 'won') $city_link .= '</a>';
       mysql_query("INSERT INTO messages (server_id,user_id,time,message) VALUES (".$transaction['server_id'].",".$transaction['user_id'].",".time().",'<span class=\"$class\">Attack against $city_link $class</span>')",$db) or die(mysql_error());
+		if($user->getValue('twitter'))
+			send_tweet($user->getValue('twitter'), strip_tags("Attack against $city_link $class"));
 
 		$other_class = ($class == 'won') ? 'lost' : 'won';
 		$city_link = '';
@@ -83,6 +87,8 @@ class unit_functions {
 		if($class == 'lost') $city_link .= '</a>';
 		$user_link .= '<a href="/server/'.$transaction['server_id'].'/user/'.$user->getValue('userid').'">'.($user->getValue('nickname') ? mysql_real_escape_string($user->getValue('nickname'),$db) : 'User #'.$user->getValue('userid')).'</a>';
       mysql_query("INSERT INTO messages (server_id,user_id,time,message) VALUES (".$transaction['server_id'].",".$city->getValue('user')->getValue('userid').",".time().",'<span class=\"$other_class\">$user_link attacked you at $city_link and $class</span>')",$db) or die(mysql_error());
+		if($city->getValue('user')->getValue('twitter'))
+			send_tweet($city->getValue('user')->getValue('twitter'), strip_tags("$user_link attacked you at $city_link and $class"));
 
 	}//end function attack
 
@@ -105,6 +111,7 @@ class unit_functions {
 
 		$results = $defense + $randomness - $skill;
 
+      $user = new user($transaction['user_id'],new server($transaction['server_id']));
 		if($results < 0) {//only do something if successful
 			$eta = time() + ($results*-1)*40;
 			$city->setValue('user_'.$transaction['user_id'].'_access',$eta);
@@ -116,6 +123,8 @@ class unit_functions {
 		$city_link .= $city->getValue('name') ? mysql_real_escape_string($city->getValue('name'),$db) : 'City at '.$city->getValue('id');
 		if($class == 'succeeded') $city_link .= '</a>';
       mysql_query("INSERT INTO messages (server_id,user_id,time,message) VALUES (".$transaction['server_id'].",".$transaction['user_id'].",".time().",'<span class=\"$class\">Spies infiltrating $city_link $class</span>')",$db) or die(mysql_error());
+		if($user->getValue('twitter'))
+			send_tweet($user->getValue('twitter'), strip_tags("Spies infiltrating $city_link $class"));
 
 	}//end function spy
 
@@ -151,10 +160,14 @@ class unit_functions {
 		$class = ($results < 0) ? 'succeeded' : 'failed';
 		$city_link .= $city->getValue('name') ? mysql_real_escape_string($city->getValue('name'),$db) : 'City at '.$city->getValue('id');
 		mysql_query("INSERT INTO messages (server_id,user_id,time,message) VALUES (".$transaction['server_id'].",".$transaction['user_id'].",".time().",'<span class=\"$class\">Looting $city_link $class ($gold gold gained)</span>')",$db) or die(mysql_error());
+		if($user->getValue('twitter'))
+			send_tweet($user->getValue('twitter'), strip_tags("Looting $city_link $class ($gold gold gained)"));
 
 		$other_class = $class=='succeeded' ? 'failed' : 'succeeded';
 		$user_link .= '<a href="/server/'.$transaction['server_id'].'/user/'.$user->getValue('userid').'">'.($user->getValue('nickname') ? mysql_real_escape_string($user->getValue('nickname'),$db) : 'User #'.$user->getValue('userid')).'</a>';
 		mysql_query("INSERT INTO messages (server_id,user_id,time,message) VALUES (".$transaction['server_id'].",".$city->getValue('user')->getValue('userid').",".time().",'<span class=\"$other_class\">$user_link tried looting $city_link and $class ($gold gold lost)</span>')",$db) or die(mysql_error());
+		if($city->getValue('user')->getValue('twitter'))
+			send_tweet($city->getValue('user')->getValue('twitter'), strip_tags("$user_link tried looting $city_link and $class ($gold gold lost)"));
 
 	}//end function loot
 
@@ -191,10 +204,14 @@ class unit_functions {
 		$class = ($results < 0) ? 'succeeded' : 'failed';
 		$city_link .= $city->getValue('name') ? mysql_real_escape_string($city->getValue('name'),$db) : 'City at '.$city->getValue('id');
 		mysql_query("INSERT INTO messages (server_id,user_id,time,message) VALUES (".$transaction['server_id'].",".$transaction['user_id'].",".time().",'<span class=\"$class\">Subverting $city_link $class ($pop people turned)</span>')",$db) or die(mysql_error());
+		if($user->getValue('twitter'))
+			send_tweet($user->getValue('twitter'), strip_tags("Subverting $city_link $class ($pop people turned)"));
 
 		$other_class = $class=='succeeded' ? 'failed' : 'succeeded';
 		$user_link .= '<a href="/server/'.$transaction['server_id'].'/user/'.$user->getValue('userid').'">'.($user->getValue('nickname') ? mysql_real_escape_string($user->getValue('nickname'),$db) : 'User #'.$user->getValue('userid')).'</a>';
 		mysql_query("INSERT INTO messages (server_id,user_id,time,message) VALUES (".$transaction['server_id'].",".$city->getValue('user')->getValue('userid').",".time().",'<span class=\"$other_class\">$user_link tried subverting $city_link and $class ($pop people turned)</span>')",$db) or die(mysql_error());
+		if($city->getValue('user')->getValue('twitter'))
+			send_tweet($city->getValue('user')->getValue('twitter'), strip_tags("$user_link tried subverting $city_link and $class ($pop people turned)"));
 
 	}//end function subvert
 

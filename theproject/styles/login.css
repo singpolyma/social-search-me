@@ -1,38 +1,10 @@
-   .openid {
-      background: #ffffff url(../images/openid.png) no-repeat;
-		color: black;
-      background-position: 0 50%;
-      padding-left: 18px;
-   }
-   .aol {
-      background: #ffffff url(../images/aol.ico) no-repeat;
-		color: black;
-      background-position: 0 50%;
-      padding-left: 18px;
-   }
-   .livejournal {
-      background: #ffffff url(../images/livejournal.ico) no-repeat;
-		color: black;
-      background-position: 0 50%;
-      padding-left: 18px;
-   }
-   .technorati {
-      background: #ffffff url(../images/technorati.ico) no-repeat;
-		color: black;
-      background-position: 0 50%;
-      padding-left: 18px;
-   }
-   .wordpress {
-      background: #ffffff url(../images/wordpress.ico) no-repeat;
-		color: black;
-      background-position: 0 50%;
-      padding-left: 18px;
-   }
-	#login select, #login input {
-		display: block;
+	#login input {
 		font-size: 18pt;
 		margin-bottom: 3px;
 		width: 200px;
+	}
+	#login button {
+		font-size: 18pt;
 	}
 	#login h2 {
 		font-size: 20pt;
@@ -40,6 +12,6 @@
 	#login {
 		text-align: center;
 		margin: 0 auto;
-		width: 205px;
+		width: 270px;
 		font-size: 18pt;
 	}

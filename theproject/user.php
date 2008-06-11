@@ -5,16 +5,23 @@ require_once dirname(__FILE__).'/include/server.php';
 require_once dirname(__FILE__).'/include/invisible_header.php';
 
 if($_REQUEST['server_id']) $server = new server($_REQUEST['server_id']);
-$this_user = new user(intval($_REQUEST['user_id']), $server?$server:new server(1));
 
 if($_REQUEST['user_id'] == $LOGIN_DATA['user_id'] && isset($_REQUEST['nickname'])) {//if this is the logged in user
 	mysql_query("UPDATE users SET 
 nickname='".mysql_real_escape_string($_REQUEST['nickname'],$db)."',
 photo='".mysql_real_escape_string($_REQUEST['photo'],$db)."',
-email='".mysql_real_escape_string($_REQUEST['email'],$db)."'
-WHERE user_id=".$this_user->getValue('userid')
+email='".mysql_real_escape_string($_REQUEST['email'],$db)."',
+twitter='".mysql_real_escape_string($_REQUEST['twitter'],$db)."'
+WHERE user_id=".$LOGIN_DATA['user_id']
 ,$db) or die(mysql_error());
+   $ch = curl_init('http://twitter.com/friendships/create/'.urlencode($_REQUEST['twitter']).'.xml');
+   curl_setopt($ch, CURLOPT_USERPWD, file_get_contents('include/twitter.txt'));
+   curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+   $response = curl_exec($ch);
+   curl_close($ch);
 }//end if user is loggid in and form submitted
+
+$this_user = new user(intval($_REQUEST['user_id']), $server?$server:new server(1), true);
 
 ?>
 	<head>
@@ -46,13 +53,15 @@ WHERE user_id=".$this_user->getValue('userid')
 			echo '</div></form>';
 			
 			echo '<h2>Edit User Data</h2>';
-			echo '<form method="post" action=""><div>';
-			echo '<label style="display:block;float:left;width:100px;" for="nickname">Nickname:</label>';
+			echo '<form method="post" action=""><div style="margin-bottom:1em;">';
+			echo '<label style="display:block;float:left;width:150px;" for="nickname">Nickname:</label>';
 			echo ' <input type="text" name="nickname" id="nickname" value="'.htmlentities($this_user->getValue('nickname')).'" /><br />';
-			echo '<label style="display:block;float:left;width:100px;" for="photo">Photo URL:</label>';
+			echo '<label style="display:block;float:left;width:150px;" for="photo">Photo URL:</label>';
 			echo ' <input type="text" name="photo" id="photo" value="'.htmlentities($this_user->getValue('photo')).'" /><br />';
-			echo '<label style="display:block;float:left;width:100px;" for="email">Email:</label>';
+			echo '<label style="display:block;float:left;width:150px;" for="email">Email:</label>';
 			echo ' <input type="text" name="email" id="email" value="'.htmlentities($this_user->getValue('email')).'" /><br />';
+			echo '<label style="display:block;float:left;width:150px;" for="twitter">Twitter Username:</label>';
+			echo ' <input type="text" name="twitter" id="twitter" value="'.htmlentities($this_user->getValue('twitter')).'" /><br />';
 			echo ' <input type="submit" value="Save" />';
 			echo '</div></form>';
 		}//end if user_id
@@ -60,18 +69,18 @@ WHERE user_id=".$this_user->getValue('userid')
 	<?php if($server) : ?>
 	<div><?php echo $this_user->getValue('gold'); ?> Gold</div>
 	<div><?php echo $this_user->getValue('city_count'); ?> Cities</div>
-	<h2>Cities</h2>
+	<h2 style="clear:both;">Cities</h2>
 	<ul>
 	<?php
 			foreach($this_user->getValue('cities') as $city) {
 				echo '<li>';
 				$can_access = $city->getValue('user_'.$LOGIN_DATA['user_id'].'_access');
 				$can_access = ($can_access === true) || (intval($can_access) > time());
-				if($can_access) echo '<a href="/server/'.$server->getID().'/city/'.$city->getValue('id').'">';
+				echo '<a href="/server/'.$server->getID().'/city/'.$city->getValue('id').'">';
 				if($city->getValue('name'))
 					echo htmlentities($city->getValue('name')).' / ';
 				echo ' Location: '.str_pad($city->getValue('id'),6,'0',STR_PAD_LEFT);
-				if($can_access) echo '</a>';
+				echo '</a>';
 				echo ' / Population: '.$city->getValue('population');
 				echo ' / Defense: '.(intval($city->getValue('defense'))+1);
 				echo ' - <a href="/server/'.$server->getID().'/attack/'.$city->getValue('id').'">attack/move</a>';

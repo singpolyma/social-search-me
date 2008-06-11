@@ -12,6 +12,9 @@ $cities = preg_split('/[\s\+]+/',$_REQUEST['attack_id']);
 if($cities[0]) $tocity = new city($cities[0], $server);
 if($cities[1]) $fromcity = new city($cities[1], $server);
 
+if($fromcity && $fromcity->getValue('user')->getValue('userid') != $LOGIN_DATA['user_id'])
+	die('Invalid from city.');
+
 if($_POST['attack_id']) {
    $message = $fromcity->initiate_transaction(intval($_POST['attack_id']), intval($_POST['attack_count']), intval($_POST['attack_destination']));
 	if(!$message) {
@@ -38,7 +41,7 @@ if($_POST['attack_id']) {
 				echo '<h2>Select a City to Attack/Move to</h2><ul>';
 				if($fromcity) {
 					$close_upper_bound = intval($fromcity->getValue('id'))+25000;
-					$dbcities = mysql_query("SELECT user_id,city_id FROM server_cities WHERE server_id=".$server->getID()." AND city_id < $close_upper_bound ORDER BY city_id DESC  LIMIT 50",$db) or die(mysql_error());
+					$dbcities = mysql_query("SELECT user_id,city_id FROM server_cities WHERE server_id=".$server->getID()." AND city_id < $close_upper_bound ORDER BY city_id DESC LIMIT 50",$db) or die(mysql_error());
 				} else {
 					$dbcities = mysql_query("SELECT user_id,city_id FROM server_cities WHERE server_id=".$server->getID()." ORDER BY user_id LIMIT 50",$db) or die(mysql_error());
 				}//end if-else fromcity

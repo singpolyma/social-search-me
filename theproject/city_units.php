@@ -11,9 +11,10 @@ if(!$can_access) {
 	if($can_access !== true && intval($can_access) > time()) $can_access_time = ceil(($can_access - time())/60);
 	$can_access = ($can_access === true) || (intval($can_access) > time());
 }//end if ! can_access
-if(!$can_access) die('You cannot view this city.');
 
-if(!$server) $server = new server($_REQUEST['server_id']);
+if($can_access) {
+
+	if(!$server) $server = new server($_REQUEST['server_id']);
 
       $units = mysql_query("SELECT unit_id,name,description,cost FROM units WHERE server_id=".$server->getID(),$db) or die(mysql_query());
       while($unit = mysql_fetch_assoc($units)) {
@@ -27,9 +28,11 @@ if(!$server) $server = new server($_REQUEST['server_id']);
          $unit_list .= "</li>\n";
       }//end while unit
 
-echo '<h3>Units ('.$this_city->unit_count().')</h3>';
-echo '<ul>';
-echo $unit_list;
-echo '</ul>';
+	echo '<h3>Units ('.$this_city->unit_count().')</h3>';
+	echo '<ul>';
+	echo $unit_list;
+	echo '</ul>';
+
+}//end if can_access
 
 ?>

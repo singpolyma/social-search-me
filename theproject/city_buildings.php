@@ -11,9 +11,10 @@ if(!$can_access) {
 	if($can_access !== true && intval($can_access) > time()) $can_access_time = ceil(($can_access - time())/60);
 	$can_access = ($can_access === true) || (intval($can_access) > time());
 }//end if ! can_access
-if(!$can_access) die('You cannot view this city.');
 
-if(!$server) $server = new server($_REQUEST['server_id']);
+if($can_access) {
+
+	if(!$server) $server = new server($_REQUEST['server_id']);
 
       $buildings = mysql_query("SELECT building_id,name,description,cost FROM buildings WHERE server_id=".$server->getID(),$db) or die(mysql_query());
       while($building = mysql_fetch_assoc($buildings)) {
@@ -26,9 +27,11 @@ if(!$server) $server = new server($_REQUEST['server_id']);
          $building_options .= "\t\t\t".'<option value="'.$building['building_id'].'">'.htmlentities($building['name']).' ('.$building['cost'].' Gold)</option>'."\n";
       }//end while building
 
-echo '<h3>Buildings</h3>';
-echo '<ul>';
-echo $building_list;
-echo '</ul>';
+	echo '<h3>Buildings</h3>';
+	echo '<ul>';
+	echo $building_list;
+	echo '</ul>';
+
+}//end if can_access
 
 ?>

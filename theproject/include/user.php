@@ -9,31 +9,33 @@
 		protected $email;
 		protected $openids = array();
 		protected $photo;
+		protected $twitter;
 		protected $facebook_id;
 		protected $gold;
 		protected $city_count;
 		protected $cities = array();
 		protected $server;
 
-		function __construct($userid,$server='main') {
+		function __construct($userid,$server='main',$do_not_create=false) {
 			global $db;
 			if(is_string($server)) $server = new server($server);
 			$this->server = $server;
 			if(!$userid) die('Need to pass user constructor a valid userid in user.php');
 			$this->userid = $userid;
 			require_once dirname(__FILE__).'/connectDB.php';
-			$data = mysql_query("SELECT nickname, email, photo, facebook_id FROM users WHERE user_id=$userid LIMIT 1") or die(mysql_error());
+			$data = mysql_query("SELECT nickname, email, photo, twitter, facebook_id FROM users WHERE user_id=$userid LIMIT 1") or die(mysql_error());
 			if(!$data || !count($data)) die('Need to pass user constructor a valid userid in user.php');
 			$data = mysql_fetch_assoc($data);
 			$this->nickname = $data['nickname'];
 			$this->email = $data['email'];
 			$this->photo = $data['photo'];
+			$this->twitter = $data['twitter'];
 			$this->facebook_id = $data['facebook_id'];
 			$data = mysql_query("SELECT `key`, value FROM server_data WHERE server_id=".$this->server->getID()." AND user_id=$userid") or die(mysql_error());
 			while($record = mysql_fetch_assoc($data)) {//loop over all returned records
 				$this->$record['key'] = $record['value'];
 			}//end while record
-			if($this->gold === NULL && $this->city_count === NULL) $this->setupNewUser();
+			if($this->gold === NULL && $this->city_count === NULL && !$do_not_create) $this->setupNewUser();
 			$data = mysql_query("SELECT city_id FROM server_cities WHERE server_id=".$this->server->getID()." AND user_id=$this->userid ORDER BY city_id DESC") or die(mysql_error());
 			while($city = mysql_fetch_assoc($data)) {
 				$this->cities[] = new city($city['city_id'],$this->server,$this);
