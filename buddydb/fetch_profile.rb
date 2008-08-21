@@ -60,7 +60,7 @@ end
 
 begin
 	#page = open(ARGV[0]).read
-	page = `curl -s -L -A"Mozilla/4.0" "#{ARGV[0]}"`
+	page = `curl -s -L -A"Mozilla/5.0" "#{ARGV[0]}"`
 rescue Exception
 	exit
 end
