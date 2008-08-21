@@ -52,9 +52,15 @@ end
 # hostname username password database
 db_settings = open('/home/singpolyma/buddydb').read.split(/\s+/)
 
+if ARGV[0] =~ /facebook\.com\/profile\.php/
+	ARGV[0] = 'http://www.facebook.com/people/_/' + ARGV[0].scan(/facebook\.com\/profile\.php\?id=(\d+)$/)[0][0]
+	page = `curl -s -L -A"Mozilla/4.0" "#{ARGV[0]}"`
+	ARGV[0] = page.scan(/window.location.replace\("([^"]+)"\);/)[0][0].gsub!(/\\\//,'/')
+end
+
 begin
 	#page = open(ARGV[0]).read
-	page = `curl -s -L "#{ARGV[0]}"`
+	page = `curl -s -L -A"Mozilla/4.0" "#{ARGV[0]}"`
 rescue Exception
 	exit
 end
@@ -171,7 +177,7 @@ if fn == '' && hcard
 	end
 end
 
-if hcard
+if hcard and !(uri.to_s =~ /facebook\.com/)
 	hcard.search('.url').each do |link|
 		urls.push link.attributes['href']
 	end
@@ -208,10 +214,21 @@ doc.search('a[@rel~=contact],a[@rel~=friend],a[@rel~=acquaintance],a[@rel~=met],
 	contacts[contact.attributes['href']] = {'rel' => contact.attributes['rel'].split(/ /), doc => contact.parent}
 end
 
+if uri.to_s =~ /facebook\.com/ #Facebok contact hacks
+	doc.search('a').each do |contact|
+		if contact.attributes['href'] =~ /facebook\.com\/people\/[^\/]+\/\d+/
+			contacts[contact.attributes['href']] = {'rel' => 'friend', doc => nil}
+		end
+	end
+end
+
 db = Mysql.new(db_settings[0],db_settings[1],db_settings[2],db_settings[3])
 db.real_query("SET NAMES 'UTF8'")
 
-db.real_query("INSERT INTO queue (url, next_update) VALUES ('#{Mysql.quote(uri.to_s)}', #{Time.now.utc.to_i + 300000}) ON DUPLICATE KEY UPDATE next_update=#{Time.now.utc.to_i + 300000}")
+#db.real_query("INSERT INTO queue (url, next_update) VALUES ('#{Mysql.quote(uri.to_s)}', #{Time.now.utc.to_i + 300000}) ON DUPLICATE KEY UPDATE next_update=#{Time.now.utc.to_i + 300000}")
+		#queue hacks
+		db.real_query("DELETE FROM queue WHERE url='#{Mysql.quote(ARGV[0])}'")
+		db.real_query("DELETE FROM queue WHERE url='#{Mysql.quote(uri.to_s)}'")
 res = db.query("SELECT * FROM urls WHERE url='#{Mysql.quote(uri.to_s)}'")
 url_row = res.fetch_hash
 res.free
@@ -224,17 +241,12 @@ if url_row.nil?
 		db.real_query("INSERT INTO people (fn, `given-name`, `family-name`, `additional-name`, bday, tz) VALUES ('#{Mysql.quote(fn.to_s)}','#{Mysql.quote(given_name.to_s)}','#{Mysql.quote(family_name.to_s)}','#{Mysql.quote(additional_name.to_s)}',#{bday.to_i},'#{Mysql.quote(tz.to_s)}')")
 		person_id = db.insert_id
 		db.real_query("INSERT INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(uri.to_s)}', #{person_id}, 1)")
-		urls.delete(uri.to_s)
-		urls.each do |url|
-			db.real_query("INSERT IGNORE INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(url)}', #{person_id}, 0)")
-			db.real_query("INSERT IGNORE INTO queue (url, next_update) VALUES ('#{Mysql.quote(url)}', #{Time.now.utc.to_i})")
-		end
 	else
 		person_id = url_row['person_id']
 		db.real_query("INSERT INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(uri.to_s)}', #{url_row['person_id']}, 1)")
 	end
 else
-		urls.delete(uri.to_s)
+		urls.push uri.to_s #if this one has already been verified, that counts as being verified
 		res = db.query("SELECT person_id FROM urls WHERE verified=1 AND url IN ('#{urls.join('\',\'')}')")
 		verified = res.fetch_hash
 		res.free
@@ -266,6 +278,16 @@ else
 			db.real_query("DELETE FROM urls WHERE url='#{Mysql.quote(uri.to_s)}'")
 			exit ## This URL no longer belongs to anyone, die
 		end
+end
+
+if uri.to_s =~ /facebook\.com/
+	db.real_query("INSERT IGNORE INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote('http://www.facebook.com/profile.php?id=' + uri.to_s.scan(/facebook\.com\/people\/[^\/]+\/(\d+)$/)[0][0])}', #{person_id}, 1)")
+end
+
+urls.delete(uri.to_s)
+urls.each do |url|
+	db.real_query("INSERT IGNORE INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(url)}', #{person_id}, 0)")
+	db.real_query("INSERT IGNORE INTO queue (url, next_update) VALUES ('#{Mysql.quote(url)}', #{Time.now.utc.to_i})")
 end
 
 contacts.each do |url, data|
