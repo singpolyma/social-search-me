@@ -229,6 +229,7 @@ db.real_query("SET NAMES 'UTF8'")
 		#queue hacks
 		db.real_query("DELETE FROM queue WHERE url='#{Mysql.quote(ARGV[0])}'")
 		db.real_query("DELETE FROM queue WHERE url='#{Mysql.quote(uri.to_s)}'")
+
 res = db.query("SELECT * FROM urls WHERE url='#{Mysql.quote(uri.to_s)}'")
 url_row = res.fetch_hash
 res.free
@@ -253,7 +254,7 @@ else
 		
 		unless verified.nil?
 			person_id = verified['person_id']
-			db.real_query("UPDATE urls SET verified=1 WHERE url='#{Mysql.quote(uri.to_s)}'")
+			db.real_query("UPDATE urls SET verified=1,person_id=#{person_id} WHERE url='#{Mysql.quote(uri.to_s)}'")
 			sql = []
 			if fn.to_s != ''
 				sql.push "fn='#{Mysql.quote(fn.to_s)}'"
