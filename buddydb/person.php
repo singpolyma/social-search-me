@@ -86,7 +86,7 @@ require('db.php');
 
 	echo "\t\t\t<p>";
 	if($person['bday']) { echo 'Birthday: <span class="bday">'.date('Y-m-d',$person['bday']).'</span>'; }
-	if($person['tz']) { echo 'Timezone: <span class="tz">'.$person['tz'].'</span>'; }
+	if($person['tz']) { echo ' Timezone: <span class="tz">'.$person['tz'].'</span>'; }
 	echo "</p>\n";
 
 	$communicate = array();
