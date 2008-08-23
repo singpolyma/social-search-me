@@ -214,9 +214,6 @@ doc.search('a[@rel~=contact],a[@rel~=friend],a[@rel~=acquaintance],a[@rel~=met],
 	contacts[contact.attributes['href']] = {'rel' => contact.attributes['rel'].split(/ /), doc => contact.parent}
 end
 
-p contacts
-exit
-
 if uri.to_s =~ /facebook\.com/ #Facebok contact hacks
 	doc.search('a').each do |contact|
 		if contact.attributes['href'] =~ /facebook\.com\/people\/[^\/]+\/\d+/
