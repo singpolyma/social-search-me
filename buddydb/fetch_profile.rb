@@ -186,7 +186,7 @@ doc.search('a[@rel~=me]').each do |link|
 	urls.push link.attributes['href']
 end
 urls.uniq!
-
+=begin
 (JSON.parse(open("http://socialgraph.apis.google.com/lookup?q=#{urls.join(',')}&edo=1&edi=0&fme=1&sgn=0").read)['nodes'] rescue []).each do |k,v|
 	urls.push k
 	if v['nodes_referenced']
@@ -198,7 +198,7 @@ urls.uniq!
 	end
 end
 urls.uniq!
-
+=end
 urls.each do |url|
 	if url =~ /^mailto:/
 		emails.push url.scan(/^mailto:(.*)$/)[0][0]
@@ -213,6 +213,9 @@ doc.search('a[@rel~=contact],a[@rel~=friend],a[@rel~=acquaintance],a[@rel~=met],
 	end
 	contacts[contact.attributes['href']] = {'rel' => contact.attributes['rel'].split(/ /), doc => contact.parent}
 end
+
+p contacts
+exit
 
 if uri.to_s =~ /facebook\.com/ #Facebok contact hacks
 	doc.search('a').each do |contact|
@@ -248,11 +251,11 @@ if url_row.nil?
 	end
 else
 		urls.push uri.to_s #if this one has already been verified, that counts as being verified
-		res = db.query("SELECT person_id FROM urls WHERE verified=1 AND url IN ('#{urls.join('\',\'')}')")
+		res = db.query("SELECT person_id FROM urls WHERE verified=1 AND url IN ('#{urls.join('\',\'')}') LIMIT 1")
 		verified = res.fetch_hash
 		res.free
 		
-		unless verified.nil?
+		unless verified.nil? or url_row['person_id'] != verified['person_id']
 			person_id = verified['person_id']
 			db.real_query("UPDATE urls SET verified=1,person_id=#{person_id} WHERE url='#{Mysql.quote(uri.to_s)}'")
 			sql = []
