@@ -186,7 +186,7 @@ doc.search('a[@rel~=me]').each do |link|
 	urls.push link.attributes['href']
 end
 urls.uniq!
-=begin
+
 (JSON.parse(open("http://socialgraph.apis.google.com/lookup?q=#{urls.join(',')}&edo=1&edi=0&fme=1&sgn=0").read)['nodes'] rescue []).each do |k,v|
 	urls.push k
 	if v['nodes_referenced']
@@ -198,7 +198,7 @@ urls.uniq!
 	end
 end
 urls.uniq!
-=end
+
 urls.each do |url|
 	if url =~ /^mailto:/
 		emails.push url.scan(/^mailto:(.*)$/)[0][0]
