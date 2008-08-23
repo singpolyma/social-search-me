@@ -10,7 +10,7 @@ require 'mysql'
 db_settings = open('/home/singpolyma/buddydb').read.split(/\s+/)
 db = Mysql.new(db_settings[0],db_settings[1],db_settings[2],db_settings[3])
 
-res = db.query("SELECT * FROM queue WHERE next_update < #{Time.now.utc.to_i} ORDER BY next_update")
+res = db.query("SELECT * FROM queue")
 
 res.each_hash do |row|
 	Process.detach(fork { `ruby fetch_profile.rb "#{row['url']}" &` })

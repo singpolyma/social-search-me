@@ -291,12 +291,12 @@ end
 urls.delete(uri.to_s)
 urls.each do |url|
 	db.real_query("INSERT IGNORE INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(url)}', #{person_id}, 0)")
-	db.real_query("INSERT IGNORE INTO queue (url, next_update) VALUES ('#{Mysql.quote(url)}', #{Time.now.utc.to_i})")
+	db.real_query("INSERT IGNORE INTO queue (url) VALUES ('#{Mysql.quote(url)}')")
 end
 
 contacts.each do |url, data|
 	db.real_query("INSERT IGNORE INTO contacts (person_id, url) VALUES (#{person_id}, '#{Mysql.quote(url)}')")
-	db.real_query("INSERT IGNORE INTO queue (url, next_update) VALUES ('#{Mysql.quote(url)}', #{Time.now.utc.to_i})")
+	db.real_query("INSERT IGNORE INTO queue (url) VALUES ('#{Mysql.quote(url)}')")
 end
 
 nicknames.each do |nick|
