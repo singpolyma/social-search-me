@@ -60,7 +60,7 @@ end
 
 begin
 	#page = open(ARGV[0]).read
-	page = `curl -s -L -A"Mozilla/5.0" "#{ARGV[0]}"`
+	page = `curl -s -L -A"Mozilla/5.0 (SocialWebSearch)" "#{ARGV[0]}"`
 rescue Exception
 	exit
 end
@@ -235,7 +235,7 @@ url_row = res.fetch_hash
 res.free
 
 if url_row.nil?
-	res = db.query("SELECT person_id FROM urls WHERE verified=1 AND url IN ('#{urls.join('\',\'')}')")
+	res = db.query("SELECT * FROM urls WHERE verified=1 AND url IN ('#{urls.join('\',\'')}')")
 	url_row = res.fetch_hash
 	res.free
 	if url_row.nil?
@@ -246,6 +246,8 @@ if url_row.nil?
 	# This is false data - if we mark it unverified, we may accidentally verify it later... just stop
 	#	person_id = url_row['person_id']
 	#	db.real_query("INSERT INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(uri.to_s)}', #{url_row['person_id']}, 0)")
+p url_row
+puts 'bad data'
 		exit
 	end
 else
