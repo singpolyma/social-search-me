@@ -243,8 +243,10 @@ if url_row.nil?
 		person_id = db.insert_id
 		db.real_query("INSERT INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(uri.to_s)}', #{person_id}, 1)")
 	else
-		person_id = url_row['person_id']
-		db.real_query("INSERT INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(uri.to_s)}', #{url_row['person_id']}, 0)")
+	# This is false data - if we mark it unverified, we may accidentally verify it later... just stop
+	#	person_id = url_row['person_id']
+	#	db.real_query("INSERT INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(uri.to_s)}', #{url_row['person_id']}, 0)")
+		exit
 	end
 else
 		urls.push uri.to_s #if this one has already been verified, that counts as being verified
