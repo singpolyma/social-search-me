@@ -27,7 +27,7 @@ require('db.php');
 				margin-left: 80px;
 			}
 			#communicate {
-				clear: left;
+			/*	clear: left;*/
 			}
 			img {
 				border-width: 0px;

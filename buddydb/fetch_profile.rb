@@ -244,11 +244,11 @@ if url_row.nil?
 		db.real_query("INSERT INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(uri.to_s)}', #{person_id}, 1)")
 	else
 		person_id = url_row['person_id']
-		db.real_query("INSERT INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(uri.to_s)}', #{url_row['person_id']}, 1)")
+		db.real_query("INSERT INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(uri.to_s)}', #{url_row['person_id']}, 0)")
 	end
 else
 		urls.push uri.to_s #if this one has already been verified, that counts as being verified
-		res = db.query("SELECT person_id FROM urls WHERE verified=1 AND url IN ('#{urls.join('\',\'')}') LIMIT 1")
+		res = db.query("SELECT * FROM urls WHERE verified=1 AND url IN ('#{urls.join('\',\'')}') LIMIT 1")
 		verified = res.fetch_hash
 		res.free
 		
