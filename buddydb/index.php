@@ -94,6 +94,11 @@ require('db.php');
 	}//end if-else q
 
 	?>
+
+	<p style="border-top: 1px dotted #999; padding-top: 1em; text-align: center;">
+		<a href="http://singpolyma.net/2008/08/diso-gets-search/" rel="about">About / Feedback</a>
+		| <a href="http://svn.devjavu.com/singpolyma/trunk/buddydb/">Source Code</a>
+	</p>
 	</body>
 	
 </html>
