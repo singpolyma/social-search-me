@@ -100,6 +100,7 @@ require('db.php');
 	<p id="footer">
 		<a href="http://singpolyma.net/2008/08/diso-gets-search/" rel="about">About / Feedback</a>
 		| <a href="http://svn.devjavu.com/singpolyma/trunk/buddydb/">Source Code</a>
+		| <a href="http://singpolyma.net/2008/08/socialsearchmecom-api/">API</a>
 	</p>
 
 	</body>
