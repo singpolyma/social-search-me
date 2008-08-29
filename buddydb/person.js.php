@@ -48,7 +48,7 @@ if($_GET['callback'])
 	}
 
 	if($person['bday']) { echo '"bday": '.$person['bday'].', '; }
-	if($person['tz']) { echo '"tz": "'.$person['tz'].'"'; }
+	if($person['tz']) { echo '"tz": "'.$person['tz'].'", '; }
 
 	$communicate = array();
 	$follow = array();
