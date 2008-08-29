@@ -1,0 +1,17 @@
+html, body {
+	background-color: #eed;
+	font-family: Arial, sans-serif;
+}
+body {
+	margin-left: 5%;
+	margin-right: 5%;
+}
+#header {
+	border-bottom: 1px dotted #999;
+	margin-bottom: 1em;
+}
+#footer {
+	border-top: 1px dotted #999;
+	padding-top: 1em;
+	text-align: center;
+}

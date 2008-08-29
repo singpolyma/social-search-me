@@ -8,7 +8,8 @@ require('db.php');
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
 		<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-		<title>Search the Social Web!</title>
+		<title>socialsearchme.com</title>
+		<link rel="stylesheet" type="text/css" href="main.css" />
 	</head>
 
 	<body>
@@ -95,10 +96,11 @@ require('db.php');
 
 	?>
 
-	<p style="border-top: 1px dotted #999; padding-top: 1em; text-align: center;">
+	<p id="footer">
 		<a href="http://singpolyma.net/2008/08/diso-gets-search/" rel="about">About / Feedback</a>
 		| <a href="http://svn.devjavu.com/singpolyma/trunk/buddydb/">Source Code</a>
 	</p>
+
 	</body>
 	
 </html>

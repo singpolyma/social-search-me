@@ -9,7 +9,14 @@ require('db.php');
 	<head>
 		<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
 		<title>Search the Social Web!</title>
+		<link rel="stylesheet" type="text/css" href="main.css" />
 		<style type="text/css">
+			#profile {
+				float: left;
+			}
+			#contacts {
+				float: right;
+			}
 			#photos {
 				float:left;
 				margin-top: -0.5em;
@@ -32,6 +39,12 @@ require('db.php');
 			img {
 				border-width: 0px;
 			}
+			ul, li {
+				list-style-type: none;
+			}
+			#contacts ul, #contacts li {
+				padding-left: 0px;
+			}
 		</style>
 	</head>
 
@@ -40,6 +53,9 @@ require('db.php');
 	<?php
 
 	require('header.php');
+
+	ob_flush();
+	flush();
 
 	if($_GET['id']) {
 		$person_id = mysql_real_escape_string($_GET['id'],$db);
@@ -53,7 +69,7 @@ require('db.php');
 
 	$person = mysql_fetch_assoc(mysql_query("SELECT * FROM people WHERE person_id=$person_id",$db));
 
-	echo "\t\t".'<div class="vcard">'."\n";
+	echo "\t\t".'<div id="profile" class="vcard">'."\n";
 
 	$photos = mysql_query("SELECT value FROM fields WHERE type='photo' AND person_id=$person_id",$db);
 	if(mysql_num_rows($photos)) {
@@ -65,6 +81,9 @@ require('db.php');
 	}
 	
 	echo "\t\t\t<h1 class=\"fn\">".htmlspecialchars($person['fn'])."</h1>\n";
+
+	ob_flush();
+	flush();
 	
 	$url = mysql_fetch_assoc(mysql_query("SELECT url FROM urls WHERE verified=1 AND person_id=$person_id ORDER BY LENGTH(url) LIMIT 1",$db));
 	echo ' <script type="text/javascript" src="http://singpolyma.net/diso-contact-add.php?fn='.urlencode($person['fn']).'&amp;url='.urlencode($url['url']).'&amp;label=Add+Me&amp;image=http%3A%2F%2Fscrape.singpolyma.net%2Fprofile%2Fimg%2Fadd-me.png"></script> ';
@@ -175,7 +194,7 @@ require('db.php');
 				'org' => 'Dopplr'
 			);
 		} else {
-			echo "\t\t\t\t".'<li><a class="url" rel="me" href="'.htmlspecialchars($url['url']).'">'.htmlspecialchars($url['url'])."</a></li>\n";
+			echo "\t\t\t\t".'<li><a class="url" rel="me" href="'.htmlspecialchars($url['url']).'">'.htmlspecialchars(preg_replace('/^www\./','',preg_replace('/^http:\/\//','',$url['url'])))."</a></li>\n";
 		}
 	}//end while url = fetch urls
 	echo "\t\t\t</ul>\n";
@@ -210,6 +229,11 @@ require('db.php');
 
 	echo "\t\t</div>\n";
 
+	ob_flush();
+	flush();
+
+	echo '<div id="contacts">';
+	$time = microtime(true);
 	$urls = mysql_query("SELECT people.person_id,people.fn,people.`given-name`,people.`family-name`,contacts.url FROM contacts,urls,people WHERE contacts.person_id=$person_id AND urls.url=contacts.url AND people.person_id=urls.person_id ORDER BY people.fn, people.`given-name`, people.person_id",$db);
 	echo "\t\t<h2>Contacts</h2>\n\t\t<ul>";
 	$done = array();
@@ -219,8 +243,8 @@ require('db.php');
 		$done[] = $url['person_id'];
 		echo '<li class="vcard"><a class="fn url" href="/profile/person.php?id='.htmlspecialchars($url['person_id']).'">'.htmlspecialchars($url['fn']).'</a></li>';
 	}
-	echo "\t\t</ul>\n";
-
+	echo "\t\t</ul>\n</div>";
+	
 	?>
 	</body>
 </html>
