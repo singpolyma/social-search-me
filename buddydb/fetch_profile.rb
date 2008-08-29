@@ -3,98 +3,31 @@
 ENV['GEM_PATH'] = '/home/singpolyma/.gems:/usr/lib/ruby/gems/1.8'
 
 require 'rubygems'
-require 'open-uri'
 require 'hpricot'
 require 'uri'
-require 'json'
 require 'mysql'
 require 'time'
-require 'iconv'
-
-def representative_hcard(doc, url)
-
-	uri = URI.parse(url).normalize
-	url = uri.to_s
-
-	cards = doc.search('.vcard')
-	return cards[0] if cards.size == 1
-
-	cards.each do |vcard|
-		uid = vcard.at('.uid')
-		unless uid.nil?
-			begin
-				if uid.attributes['href'].reverse[0..0] == '/' && url.reverse[0..0] != '/'
-					iz = (uid.name == 'a' && uid.attributes['href'] == "#{url}/")
-				else
-					iz = (uid.name == 'a' && uid.attributes['href'] == url)
-				end
-				if iz || (URI.parse(uid.text_content).normalize.to_s == url)
-					return vcard
-				end
-			rescue Exception
-			end
-		end
-		uid = vcard.at('a[@rel~=me]')
-		unless uid.nil?
-			return vcard
-		end
-		#the following works and is good for Twitter and others, but is not official part of representative hcard
-		if vcard.name == 'address' || vcard.parent.name == 'address'
-			return vcard
-		end
-	end
-
-	nil
-
-end
+require 'lib/representative_hcard'
+require 'lib/get_doc'
+require 'lib/hcard_urls'
 
 # db format is:
 # hostname username password database
 db_settings = open('/home/singpolyma/buddydb').read.split(/\s+/)
 
-if ARGV[0] =~ /facebook\.com\/profile\.php/
-	ARGV[0] = 'http://www.facebook.com/people/_/' + ARGV[0].scan(/facebook\.com\/profile\.php\?id=(\d+)$/)[0][0]
-	page = `curl -s -L -A"Mozilla/4.0" "#{ARGV[0]}"`
-	ARGV[0] = page.scan(/window.location.replace\("([^"]+)"\);/)[0][0].gsub!(/\\\//,'/')
-end
+uri = URI.parse(ARGV[0]).normalize
+doc = get_doc(uri)
 
-begin
-	#page = open(ARGV[0]).read
-	page = `curl -s -L -A"Mozilla/5.0 (SocialWebSearch)" "#{ARGV[0]}"`
-rescue Exception
-	exit
-end
-if page == ''
+if doc.nil?
+	$stderr.puts "Fetch error for #{uri.to_s}, removing from queue"
 	db = Mysql.new(db_settings[0],db_settings[1],db_settings[2],db_settings[3])
 	db.real_query("SET NAMES 'UTF8'")
 	db.real_query("DELETE FROM queue WHERE url='#{Mysql.quote(ARGV[0])}'")
 	db.close
 	exit
 end
-#page = Iconv.iconv('UTF-8//IGNORE','UTF-8',page)[0]
-doc = Hpricot.parse(page)
 
-uri = URI.parse(ARGV[0]).normalize
-doc.search('a').each do |a|
-	a_uri = URI.parse(a.attributes['href'].gsub(' ','%20')).normalize rescue URI.parse('')
-	a_uri.scheme = uri.scheme if a_uri.scheme.nil?
-	if a_uri.scheme =~ /https?|ftp/
-		a_uri.host = uri.host if a_uri.host.nil?
-		a_uri.path = "#{uri.path}#{a_uri.path}" if a_uri.path.nil? || a_uri.path[0..0] != '/'
-	end
-	a.set_attribute 'href', a_uri.to_s
-end
-doc.search('img').each do |a|
-	a_uri = URI.parse(a.attributes['src'].gsub(' ','%20')).normalize rescue URI.parse('')
-	a_uri.scheme = uri.scheme if a_uri.scheme.nil?
-	if a_uri.scheme =~ /https?|ftp/
-		a_uri.host = uri.host if a_uri.host.nil?
-		a_uri.path = "#{uri.path}#{a_uri.path}" if a_uri.path.nil? || a_uri.path[0..0] != '/'
-	end
-	a.set_attribute 'src', a_uri.to_s
-end
-
-hcard = representative_hcard(doc, ARGV[0])
+hcard = representative_hcard(doc, uri.to_s)
 
 given_name = ''
 family_name = ''
@@ -177,27 +110,7 @@ if fn == '' && hcard
 	end
 end
 
-if hcard and !(uri.to_s =~ /facebook\.com/)
-	hcard.search('.url').each do |link|
-		urls.push link.attributes['href']
-	end
-end
-doc.search('a[@rel~=me]').each do |link|
-	urls.push link.attributes['href']
-end
-urls.uniq!
-
-(JSON.parse(open("http://socialgraph.apis.google.com/lookup?q=#{urls.join(',')}&edo=1&edi=0&fme=1&sgn=0").read)['nodes'] rescue []).each do |k,v|
-	urls.push k
-	if v['nodes_referenced']
-		v['nodes_referenced'].each do |node|
-			if node[1]['types'].index('me').nil?
-				contacts[node[0]] = {'rel' => node[1]['types'], 'doc' => nil}
-			end
-		end
-	end
-end
-urls.uniq!
+urls, contacts = hcard_urls(hcard, doc, uri)
 
 urls.each do |url|
 	if url =~ /^mailto:/
@@ -251,14 +164,38 @@ puts 'bad data'
 		exit
 	end
 else
+		person_id = url_row['person_id']
 		urls.push uri.to_s #if this one has already been verified, that counts as being verified
-		res = db.query("SELECT * FROM urls WHERE verified=1 AND url IN ('#{urls.join('\',\'')}') LIMIT 1")
+		res = db.query("SELECT person_id FROM urls WHERE person_id=#{person_id} AND verified=1 AND url IN ('#{urls.join('\',\'')}') LIMIT 1")
 		verified = res.fetch_hash
 		res.free
+
+		res = db.query("SELECT person_id,url FROM urls WHERE person_id!=#{person_id} AND verified=1 AND url IN ('#{urls.join('\',\'')}') LIMIT 1")
+		dupe = res.fetch_hash
+		res.free
 		
-		unless verified.nil? or url_row['person_id'] != verified['person_id']
-			person_id = verified['person_id']
-			db.real_query("UPDATE urls SET verified=1,person_id=#{person_id} WHERE url='#{Mysql.quote(uri.to_s)}'")
+		unless verified.nil?
+			db.real_query("UPDATE urls SET verified=1 WHERE url='#{Mysql.quote(uri.to_s)}'")
+			if dupe
+				dupe_uri = URI.parse(dupe['url'])
+				dupe_doc = get_doc(dupe_uri)
+				dupe_hcard = representative_hcard(dupe_doc, dupe_uri.to_s)
+				dupe_urls = hcard_urls(dupe_hcard, dupe_doc, dupe_uri)[0]
+				iz_dupe = false
+				dupe_urls.each do |url|
+					iz_dupe = true unless urls.index(url).nil?
+				end
+				if iz_dupe
+					db.real_query("UPDATE IGNORE urls SET person_id=#{dupe['person_id']} WHERE person_id=#{person_id}")
+					db.real_query("UPDATE IGNORE organizations SET person_id=#{dupe['person_id']} WHERE person_id=#{person_id}")
+					db.real_query("UPDATE IGNORE `fields` SET person_id=#{dupe['person_id']} WHERE person_id=#{person_id}")
+					db.real_query("UPDATE IGNORE contacts SET person_id=#{dupe['person_id']} WHERE person_id=#{person_id}")
+					db.real_query("UPDATE IGNORE categories SET person_id=#{dupe['person_id']} WHERE person_id=#{person_id}")
+					db.real_query("UPDATE IGNORE addresses SET person_id=#{dupe['person_id']} WHERE person_id=#{person_id}")
+					db.real_query("DELETE FROM people WHERE person_id=#{person_id}")
+					person_id = dupe['person_id']
+				end
+			end
 			sql = []
 			if fn.to_s != ''
 				sql.push "fn='#{Mysql.quote(fn.to_s)}'"
