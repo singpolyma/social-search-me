@@ -10,6 +10,7 @@ require('db.php');
 		<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
 		<title>Search the Social Web!</title>
 		<link rel="stylesheet" type="text/css" href="main.css" />
+		<link rel="shortcut icon" href="img/user_green_magnify.png" type="image/png" />
 		<style type="text/css">
 			#profile {
 				float: left;
