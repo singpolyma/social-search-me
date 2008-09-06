@@ -210,6 +210,24 @@ require('db.php');
 		}//end foreach communicate
 		echo "\t\t\t</ul>\n";
 	}//end if communicate
+	
+	$ims = mysql_query("SELECT url FROM urls WHERE verified=2 AND person_id=$person_id ORDER BY LENGTH(url)",$db);
+	if(mysql_num_rows($ims)) {
+		echo "\t\t\t<h4>Instant Messaging</h4>\n";
+		echo "\t\t\t<ul>\n";
+		while($im = mysql_fetch_assoc($ims)) {
+			$t = explode(':',$im['url']);
+			$protocol = $t[0];
+			array_shift($t);
+			$fn = preg_split('/[=\?]/',implode(':',$t));
+			$fn = array_pop($fn);
+			echo "\t\t\t\t<li>";
+			echo '<img src="img/'.htmlspecialchars($protocol).'.png" alt="'.htmlspecialchars($protocol).':" /> <a class="url im" href="'.htmlspecialchars($im['url']).'">'.htmlspecialchars($fn).'</a>';
+			echo "</li>\n";
+		}
+		echo "\t\t\t</ul>\n";
+	}
+	
 	if(mysql_num_rows($emails)) {
 		echo "\t\t\t<p>Email: ";
 		$nn = array();

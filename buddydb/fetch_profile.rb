@@ -40,6 +40,7 @@ contacts = {}
 nicknames = []
 photos = []
 emails = []
+ims = []
 
 if hcard
 	given_name = hcard.at('.n .given-name').inner_html.gsub(/<.*?>/,'').strip rescue ''
@@ -103,7 +104,7 @@ end
 if nicknames.size < 1 && given_name == '' && family_name != ''
 	fn = 'The ' + family_name
 end
-if fn == '' && hcard
+if hcard && hcard.at('.fn')
 	begin
 		fn = hcard.at('.fn').inner_html.gsub(/<.*?>/,'').strip.gsub(/&amp;/,'&')
 	rescue
@@ -115,6 +116,18 @@ urls, contacts = hcard_urls(hcard, doc, uri)
 urls.each do |url|
 	if url =~ /^mailto:/
 		emails.push url.scan(/^mailto:(.*)$/)[0][0]
+		urls.delete url
+	end
+	if url =~ /^xmpp:/ or url =~ /^sip:/ or url =~ /^aim:goim\?screenname=/ or url =~ /^ymsgr:sendIM\?/ or url =~ /^msnim:chat\?contact=/
+		ims.push url
+		urls.delete url
+	end
+	if url =~ /^gtalk:chat\?jid=/
+		emails.push 'xmpp:' + url.scan(/^gtalk:chat\?jid=(.*)$/)[0][0]
+		urls.delete url
+	end
+	if url =~ /^gtalk:call\?jid=/
+		emails.push 'xmpp:' + url.scan(/^gtalk:call\?jid=(.*)$/)[0][0]
 		urls.delete url
 	end
 end
@@ -143,7 +156,7 @@ db.real_query("SET NAMES 'UTF8'")
 		db.real_query("DELETE FROM queue WHERE url='#{Mysql.quote(ARGV[0])}'")
 		db.real_query("DELETE FROM queue WHERE url='#{Mysql.quote(uri.to_s)}'")
 
-res = db.query("SELECT * FROM urls WHERE url='#{Mysql.quote(uri.to_s)}'")
+res = db.query("SELECT * FROM urls WHERE url='#{Mysql.quote(uri.to_s)}' LIMIT 1")
 url_row = res.fetch_hash
 res.free
 
@@ -176,6 +189,9 @@ else
 		
 		unless verified.nil?
 			db.real_query("UPDATE urls SET verified=1 WHERE url='#{Mysql.quote(uri.to_s)}'")
+			res = db.query("SELECT * FROM people WHERE person_id=#{person_id} LIMIT 1")
+			person = res.fetch_hash
+			res.free
 			if dupe
 				dupe_uri = URI.parse(dupe['url'])
 				dupe_doc = get_doc(dupe_uri)
@@ -197,16 +213,16 @@ else
 				end
 			end
 			sql = []
-			if fn.to_s != ''
+			if fn.to_s != '' && fn.to_s.length >= person['fn'].length
 				sql.push "fn='#{Mysql.quote(fn.to_s)}'"
 			end
-			if given_name.to_s != ''
+			if given_name.to_s != '' && given_name.to_s.length >= person['given-name'].length
 				sql.push "`given-name`='#{Mysql.quote(given_name.to_s)}'"
 			end
-			if family_name.to_s != ''
+			if family_name.to_s != '' && family_name.to_s.length >= person['family-name'].length
 				sql.push "`family-name`='#{Mysql.quote(family_name.to_s)}'"
 			end
-			if additional_name.to_s != ''
+			if additional_name.to_s != '' && additional_name.to_s.length >= person['additional-name'].length
 				sql.push "`additional-name`='#{Mysql.quote(additional_name.to_s)}'"
 			end
 			if bday.to_i > 0
@@ -230,6 +246,10 @@ urls.delete(uri.to_s)
 urls.each do |url|
 	db.real_query("INSERT IGNORE INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(url)}', #{person_id}, 0)")
 	db.real_query("INSERT IGNORE INTO queue (url) VALUES ('#{Mysql.quote(url)}')")
+end
+
+ims.each do |im|
+	db.real_query("INSERT INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(im)}', #{person_id}, 2) ON DUPLICATE KEY UPDATE verified=2")
 end
 
 contacts.each do |url, data|
