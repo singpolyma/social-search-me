@@ -81,9 +81,10 @@ require('db.php');
 
 	} else { //display search form
 		?>
-		<form method="get" action="?count=30"><div>
+		<form method="get" action=""><div>
 			<h2>Search by name/nickname</h2>
 			<input type="text" name="q" />
+			<input type="hidden" name="count" value="30" />
 			<input type="submit" value="Search" />
 		</div></form>
 		
