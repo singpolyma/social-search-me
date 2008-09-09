@@ -68,20 +68,20 @@ require('db.php');
 			$results += print_results($people, $db, 'Matches from Contacts');
 		}//end if pov
 		
-		$people = mysql_query("SELECT person_id,fn FROM people WHERE `given-name` LIKE '%$given_name%' AND `family-name` LIKE '%$family_name%' AND `additional-name` LIKE '%$additional_name%'",$db) or die(mysql_error());
+		$people = mysql_query("SELECT person_id,fn FROM people WHERE `given-name` LIKE '%$given_name%' AND `family-name` LIKE '%$family_name%' AND `additional-name` LIKE '%$additional_name%'".($_GET['count'] ? ' LIMIT '.intval($_GET['count']) : ''),$db) or die(mysql_error());
 		$results += print_results($people, $db, 'Exact matches');
 	
-		$people = mysql_query("SELECT person_id,value AS fn FROM fields WHERE value LIKE '%$nickname%' AND (type='nickname' OR type='email')",$db) or die(mysql_error());
+		$people = mysql_query("SELECT person_id,value AS fn FROM fields WHERE value LIKE '%$nickname%' AND (type='nickname' OR type='email')".($_GET['count'] ? ' LIMIT '.intval($_GET['count']-$results) : ''),$db) or die(mysql_error());
 		$results += print_results($people, $db, 'Nickname matches');
 		
-		$people = mysql_query("SELECT person_id,fn FROM people WHERE fn LIKE '%$nickname%'",$db) or die(mysql_error());
+		$people = mysql_query("SELECT person_id,fn FROM people WHERE fn LIKE '%$nickname%'".($_GET['count'] ? ' LIMIT '.intval($_GET['count']-$results) : ''),$db) or die(mysql_error());
 		$results += print_results($people, $db, 'Fuzzy matches');
 		
 		if(!$results) echo '<p>There were no results for your search.</p>';
 
 	} else { //display search form
 		?>
-		<form method="get" action=""><div>
+		<form method="get" action="?count=30"><div>
 			<h2>Search by name/nickname</h2>
 			<input type="text" name="q" />
 			<input type="submit" value="Search" />

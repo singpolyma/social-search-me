@@ -44,17 +44,17 @@ if($_GET['callback'])
 			require('normalize_url.php');
 			$pov = @mysql_fetch_assoc(mysql_query("SELECT person_id FROM urls WHERE url='".mysql_real_escape_string(normalize_url($_GET['pov']),$db)."'"));
 			$pov = intval($pov['person_id']);
-			$people = mysql_query("SELECT people.person_id,people.fn FROM contacts,urls,people WHERE contacts.person_id=$pov AND contacts.url=urls.url AND urls.person_id=people.person_id AND people.fn LIKE '%$nickname%'",$db) or die(mysql_error());
+			$people = mysql_query("SELECT people.person_id,people.fn,urls.url FROM contacts,urls,people WHERE contacts.person_id=$pov AND contacts.url=urls.url AND urls.person_id=people.person_id AND people.fn LIKE '%$nickname%'",$db) or die(mysql_error());
 			$results += print_results($people, $db, 'Matches from Contacts');
 		}//end if pov
-		
-		$people = mysql_query("SELECT person_id,fn FROM people WHERE `given-name` LIKE '%$given_name%' AND `family-name` LIKE '%$family_name%' AND `additional-name` LIKE '%$additional_name%'",$db) or die(mysql_error());
+
+		$people = mysql_query("SELECT person_id,fn FROM people WHERE `given-name` LIKE '%$given_name%' AND `family-name` LIKE '%$family_name%' AND `additional-name` LIKE '%$additional_name%'".($_GET['count'] ? ' LIMIT '.intval($_GET['count']) : ''), $db) or die(mysql_error());
 		$results += print_results($people, $db, 'Exact matches');
 	
-		$people = mysql_query("SELECT person_id,value AS fn FROM fields WHERE value LIKE '%$nickname%' AND (type='nickname' OR type='email')",$db) or die(mysql_error());
+		$people = mysql_query("SELECT person_id,value AS fn FROM fields WHERE value LIKE '%$nickname%' AND (type='nickname' OR type='email')".($_GET['count'] ? ' LIMIT '.intval($_GET['count']-$results) : ''),$db) or die(mysql_error());
 		$results += print_results($people, $db, 'Nickname matches');
 		
-		$people = mysql_query("SELECT person_id,fn FROM people WHERE fn LIKE '%$nickname%'",$db) or die(mysql_error());
+		$people = mysql_query("SELECT person_id,fn FROM people WHERE fn LIKE '%$nickname%'".($_GET['count'] ? ' LIMIT '.intval($_GET['count']-$results) : ''),$db) or die(mysql_error());
 		$results += print_results($people, $db, 'Fuzzy matches');
 
 echo '}';

@@ -19,9 +19,9 @@ if($_GET['callback'])
 
 	if($person_id) {
 
-	$person = mysql_fetch_assoc(mysql_query("SELECT * FROM people WHERE person_id=$person_id",$db));
+	$person = mysql_fetch_assoc(mysql_query("SELECT ".(isset($_GET['compact'])?'fn':'*')." FROM people WHERE person_id=$person_id",$db));
 
-	$photos = mysql_query("SELECT value FROM fields WHERE type='photo' AND person_id=$person_id",$db);
+	$photos = mysql_query("SELECT value FROM fields WHERE type='photo' AND person_id=$person_id".(isset($_GET['compact'])?' LIMIT 1':''),$db);
 	if(mysql_num_rows($photos)) {
 		echo '"photo":[';
 		while($photo = mysql_fetch_assoc($photos)) {
@@ -31,28 +31,32 @@ if($_GET['callback'])
 	}
 	
 	echo '"fn": "'.addslashes($person['fn']).'", ';
-	
-	echo '"n": { "given-name": "'.addslashes($person['given-name']).'",'
-	                            . ' "additional-name": "'.addslashes($person['additional-name']).'",'
-	                            . ' "family-name": "'.addslashes($person['family-name']).'" }, ';
 
-	$nicknames = mysql_query("SELECT value FROM fields WHERE type='nickname' AND person_id=$person_id",$db);
-	if(mysql_num_rows($nicknames)) {
-		echo '"nickname": [';
-		$nn = array();
-		while($nickname = mysql_fetch_assoc($nicknames)) {
-			$nn[] = addslashes($nickname['value']);
+	if(!isset($_GET['compact'])) {
+
+		echo '"n": { "given-name": "'.addslashes($person['given-name']).'",'
+											 . ' "additional-name": "'.addslashes($person['additional-name']).'",'
+											 . ' "family-name": "'.addslashes($person['family-name']).'" }, ';
+
+		$nicknames = mysql_query("SELECT value FROM fields WHERE type='nickname' AND person_id=$person_id",$db);
+		if(mysql_num_rows($nicknames)) {
+			echo '"nickname": [';
+			$nn = array();
+			while($nickname = mysql_fetch_assoc($nicknames)) {
+				$nn[] = addslashes($nickname['value']);
+			}
+			echo '"'.implode('", "',$nn).'"';
+			echo '], ';
 		}
-		echo '"'.implode('", "',$nn).'"';
-		echo '], ';
-	}
 
-	if($person['bday']) { echo '"bday": '.$person['bday'].', '; }
-	if($person['tz']) { echo '"tz": "'.$person['tz'].'", '; }
+		if($person['bday']) { echo '"bday": '.$person['bday'].', '; }
+		if($person['tz']) { echo '"tz": "'.$person['tz'].'", '; }
+
+	}
 
 	$communicate = array();
 	$follow = array();
-	$urls = mysql_query("SELECT url FROM urls WHERE verified=1 AND person_id=$person_id ORDER BY LENGTH(url)",$db);
+	$urls = mysql_query("SELECT url FROM urls WHERE verified=1 AND person_id=$person_id ORDER BY LENGTH(url)".(isset($_GET['compact'])?' LIMIT 1':''), $db);
 	echo '"url": [';
 	while($url = mysql_fetch_assoc($urls)) {
 		if(preg_match('/twitter\.com\/([^\/]*?)(\/.*)?$/',$url['url'],$match)) {
@@ -140,7 +144,6 @@ if($_GET['callback'])
 		}
 	}//end while url = fetch urls
 
-	$emails = mysql_query("SELECT value FROM fields WHERE type='email' AND person_id=$person_id",$db);
 	if(count($communicate)) {
 		foreach($communicate as $url) {
 			echo '{ "logo": "'.$url['logo'].'", "org": "'.$url['org'].'", "url": "'.$url['url'].'", "fn": "'.$url['fn'].'" }, ';
@@ -155,26 +158,33 @@ if($_GET['callback'])
 
 	echo '], ';
 
-	if(mysql_num_rows($emails)) {
-		echo '"email": [';
-		$nn = array();
-		while($email = mysql_fetch_assoc($emails)) {
-			$nn[] = addslashes($email['value']);
+	if(!isset($_GET['compact'])) {
+		$emails = mysql_query("SELECT value FROM fields WHERE type='email' AND person_id=$person_id",$db);
+		if(mysql_num_rows($emails)) {
+			echo '"email": [';
+			$nn = array();
+			while($email = mysql_fetch_assoc($emails)) {
+				$nn[] = addslashes($email['value']);
+			}
+			echo '"'.implode('", "',$nn).'"';
+			echo '], ';
 		}
-		echo '"'.implode('", "',$nn).'"';
-		echo '], ';
 	}
 	
-	$urls = mysql_query("SELECT people.person_id,people.fn,people.`given-name`,people.`family-name`,contacts.url FROM contacts,urls,people WHERE contacts.person_id=$person_id AND urls.url=contacts.url AND people.person_id=urls.person_id ORDER BY people.fn, people.`given-name`, people.person_id",$db);
-	echo '"contacts": [';
-	$done = array();
-	while($url = mysql_fetch_assoc($urls)) {
-		if(!$url['fn']) continue;
-		if(in_array($url['person_id'],$done)) continue;
-		$done[] = $url['person_id'];
-		echo addslashes($url['person_id']).', ';
+	if(!isset($_GET['compact'])) {
+		
+		$urls = mysql_query("SELECT people.person_id,people.fn,people.`given-name`,people.`family-name`,contacts.url FROM contacts,urls,people WHERE contacts.person_id=$person_id AND urls.url=contacts.url AND people.person_id=urls.person_id ORDER BY people.fn, people.`given-name`, people.person_id",$db);
+		echo '"contacts": [';
+		$done = array();
+		while($url = mysql_fetch_assoc($urls)) {
+			if(!$url['fn']) continue;
+			if(in_array($url['person_id'],$done)) continue;
+			$done[] = $url['person_id'];
+			echo addslashes($url['person_id']).', ';
+		}
+		echo '] ';
+
 	}
-	echo '] ';
 
 	}//end if person_id
 
