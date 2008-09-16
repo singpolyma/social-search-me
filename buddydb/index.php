@@ -76,7 +76,7 @@ require('db.php');
 		$people = mysql_query("SELECT person_id,value AS fn FROM fields WHERE value LIKE '$nickname%' AND (type='nickname' OR type='email')".($_GET['count'] ? ' LIMIT '.intval($_GET['count']-$results) : ''),$db) or die(mysql_error());
 		$results += print_results($people, $db, 'Nickname matches');
 		
-		$people = mysql_query("SELECT person_id,fn FROM people WHERE AND fn LIKE '$nickname%' OR `family-name` LIKE '$nickname%'".($_GET['count'] ? ' LIMIT '.intval($_GET['count']-$results) : ''),$db) or die(mysql_error());
+		$people = mysql_query("SELECT person_id,fn FROM people WHERE fn LIKE '$nickname%' OR `family-name` LIKE '$nickname%'".($_GET['count'] ? ' LIMIT '.intval($_GET['count']-$results) : ''),$db) or die(mysql_error());
 		$results += print_results($people, $db, 'Fuzzy matches');
 		
 		if(!$results) echo '<p>There were no results for your search.</p>';
