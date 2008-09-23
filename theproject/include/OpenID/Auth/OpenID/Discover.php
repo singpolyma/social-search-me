@@ -222,6 +222,7 @@ function Auth_OpenID_discoverWithoutYadis($uri, &$fetcher)
     // rel="...">
     $endpoint =& new Auth_OpenID_ServiceEndpoint();
     $service = $endpoint->fromHTML($identity_url, $http_resp->body);
+
     if ($service === null) {
         $openid_services = array();
     } else {

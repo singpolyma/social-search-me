@@ -195,11 +195,12 @@ class Auth_OpenID_Parse {
                                  $html);
 
         // Try to find the <HTML> tag.
-        $html_re = $this->htmlFind();
-        $html_matches = array();
-        if (!preg_match($html_re, $stripped, $html_matches)) {
-            return array();
-        }
+//        $html_re = $this->htmlFind();
+  //      $html_matches = array();
+    //    if (!preg_match($html_re, $stripped, $html_matches)) {
+      //      return array();
+       // }
+       $html_matches = array($stripped);
 
         // Try to find the <HEAD> tag.
         $head_re = $this->headFind();
