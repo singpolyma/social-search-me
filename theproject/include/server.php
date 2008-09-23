@@ -61,6 +61,7 @@
 			$players = mysql_query("SELECT user_id FROM server_data WHERE server_id=".$this->getID()." AND `key`='gold'",$db) or die(mysql_error());
 			while($player = mysql_fetch_assoc($players)) {
 				$player_data = new user($player['user_id'], $this, true);
+				mysql_query("INSERT INTO board (round_end, server_id, user_id, score) VALUES ($startdate, $this->id, ".$player['user_id'].", ".$player_data->calculateScore().")") or die(mysql_error());
 				if($player_data->getValue('twitter')) {
 					//send_tweet($player_data->getValue('twitter'), 'Server '.$this->getName().' restarted.  New Round begins '.date('Y-m-d H:i',$startdate));
 				} else if($player_data->getValue('email')) {
