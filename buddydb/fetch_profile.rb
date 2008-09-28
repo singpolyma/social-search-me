@@ -266,6 +266,12 @@ photos.each do |photo|
 end
 
 emails.each do |email|
+   t = CGI.unescape(CGI.unescapeHTML(email)).gsub(/\s*[^\w]at[^\w]?\s*/,'@').gsub(/\s*[^\w]dot[^\w]\s*/,'.').split(/\s+/)
+	email = nil
+	t.each do |v|
+		email = v.split(/\?/)[0] if v =~ /@/
+	end
+	next if email.nil?
 	db.real_query("INSERT IGNORE INTO fields (person_id,type,value) VALUES (#{person_id},'email','#{Mysql.quote(email)}')")
 end
 

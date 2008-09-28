@@ -63,10 +63,12 @@ require('db.php');
 	} else {
 		require('normalize_url.php');
 		$url = mysql_real_escape_string(normalize_url($_GET['url']),$db);
-		shell_exec("ruby fetch_profile.rb \"$url\"");
+		if(!isset($_GET['nofetch'])) shell_exec("ruby fetch_profile.rb \"$url\"");
 		$person_id = @mysql_fetch_assoc(mysql_query("SELECT person_id FROM urls WHERE url='$url'",$db));
 		$person_id = $person_id['person_id'];
 	}//end if id
+
+	if(!isset($_GET['contacts'])) :
 
 	$person = mysql_fetch_assoc(mysql_query("SELECT * FROM people WHERE person_id=$person_id",$db));
 
@@ -251,18 +253,35 @@ require('db.php');
 	ob_flush();
 	flush();
 
+	endif; //!contacts
+
+	if(!isset($_GET['nocontacts'])) :
+
 	echo '<div id="contacts">';
-	$time = microtime(true);
-	$urls = mysql_query("SELECT people.person_id,people.fn,people.`given-name`,people.`family-name`,contacts.url FROM contacts,urls,people WHERE contacts.person_id=$person_id AND urls.url=contacts.url AND people.person_id=urls.person_id ORDER BY people.fn, people.`given-name`, people.person_id",$db);
+	$urls = mysql_query("SELECT people.person_id,people.fn,contacts.url FROM contacts,urls,people WHERE contacts.person_id=$person_id AND urls.url=contacts.url AND people.person_id=urls.person_id ORDER BY people.fn",$db);
 	echo "\t\t<h2>Contacts</h2>\n\t\t<ul>";
 	$done = array();
 	while($url = mysql_fetch_assoc($urls)) {
 		if(!$url['fn']) continue;
 		if(in_array($url['person_id'],$done)) continue;
 		$done[] = $url['person_id'];
-		echo '<li class="vcard"><a class="fn url" href="/profile/person.php?id='.htmlspecialchars($url['person_id']).'">'.htmlspecialchars($url['fn']).'</a></li>';
+		$fields = mysql_query('SELECT * FROM fields WHERE person_id='.$url['person_id']);
+		while($field = mysql_fetch_assoc($fields)) {
+			if(!$url['photo'] && $field['type'] == 'photo') $url['photo'] = $field['value'];
+			if($_GET['contacts'] == 'email' && !$url['email'] && $field['type'] == 'email') $url['email'] = $field['value'];
+		}
+		if($_GET['contacts'] == 'email' && !$url['email']) continue;
+		echo '<li class="vcard">';
+		echo '<a class="url uid" href="'.htmlspecialchars($url['url']).'">';
+		if($url['photo']) echo '<img src="'.htmlspecialchars($url['photo']).'" class="photo" alt="" style="max-width:1.5em;" />';
+		echo '</a> ';
+		echo '<a class="fn url" href="/profile/person.php?id='.htmlspecialchars($url['person_id']).'">'.htmlspecialchars($url['fn']).'</a>';
+		if($_GET['contacts'] == 'email') echo ' (<a href="mailto:'.htmlspecialchars($url['email']).'" class="email">'.htmlspecialchars($url['email']).'</a>)';
+		echo '</li>';
 	}
 	echo "\t\t</ul>\n</div>";
+
+	endif;//!nocontacts
 	
 	?>
 	</body>
