@@ -5,6 +5,7 @@ ENV['GEM_PATH'] = '/home/singpolyma/.gems:/usr/lib/ruby/gems/1.8'
 require 'rubygems'
 require 'hpricot'
 require 'uri'
+require 'cgi'
 require 'mysql'
 require 'time'
 require 'lib/representative_hcard'
@@ -266,10 +267,10 @@ photos.each do |photo|
 end
 
 emails.each do |email|
-   t = CGI.unescape(CGI.unescapeHTML(email)).gsub(/\s*[^\w]at[^\w]?\s*/,'@').gsub(/\s*[^\w]dot[^\w]\s*/,'.').split(/\s+/)
+   t = CGI.unescapeHTML(email).gsub(/\s*[^\w]at[^\w]?\s*/,'@').gsub(/\s*[^\w]dot[^\w]\s*/,'.').split(/\s+/)
 	email = nil
 	t.each do |v|
-		email = v.split(/\?/)[0] if v =~ /@/
+		email = CGI.unescape(v.split(/\?/)[0].gsub(/\+/,'%2B')) if v =~ /@/
 	end
 	next if email.nil?
 	db.real_query("INSERT IGNORE INTO fields (person_id,type,value) VALUES (#{person_id},'email','#{Mysql.quote(email)}')")
