@@ -12,7 +12,7 @@
 #define SELFGCOLOR		"#ffffff"
 
 /* tagging */
-const char *tags[] = { "www", "term", "chat", "misc", "5", "6", "7", "8", "media" };
+const char *tags[] = { "www", "term", "chat", "mail", "5", "6", "7", "8", "media" };
 static Rule rules[] = {
 	/* class:instance:title regex	tags regex	isfloating */
 	{ "Gimp",					NULL,			True },
@@ -38,6 +38,7 @@ static Rule rules[] = {
 	{ "gedit",					"term",		False },
 	{ "thunar",					"term",		False },
 	{ "pdmenu",					".*",			False },
+	{ "mutt",					"mail",			False },
 };
 
 /* layout(s) */
@@ -63,12 +64,13 @@ Key keys[] = { \
 	{ 0,					XK_F4,		spawn, 		"exec rxvt" }, \
 	{ 0,					XK_F5,		spawn, 		"thunar ~/" }, \
 	{ 0,					XK_F6,		spawn, 		"exec urxvt -name cmus -e cmus" }, \
-	{ MODKEY,			XK_F6,		spawn, 		"exec urxvt -name mediacentre -e ssh mediacentre" }, \
-	{ 0,					XK_F7,		spawn, 		"flock" }, \
+	{ MODKEY,			XK_F6,		spawn, 		"exec urxvt -name mediacentre -e ssh singpolyma.dnsalias.net" }, \
+	{ 0,					XK_F7,		spawn, 		"firefox" }, \
 	{ MODKEY,			XK_F7,		spawn, 		"psi" }, \
+	{ 0,					XK_F8,		spawn, 		"exec urxvt -name mutt -e mutt" }, \
 	{ MODKEY|ControlMask,		XK_n,		spawn, 		"gksu network-admin" }, \
 	{ MODKEY|ControlMask,		XK_l,		spawn, 		"sleep 0.1 && slock" }, \
-	{ MODKEY|ControlMask,		XK_Delete,	spawn, 		"sudo shutdown now -h" }, \
+	{ MODKEY|ControlMask,		XK_Delete,	spawn, 		"gnome-power-cmd.sh shutdown" }, \
 	{ MODKEY,			XK_space,	setlayout,	NULL }, \
 	{ MODKEY,			XK_b,		togglebar,	NULL }, \
 	{ MODKEY,			XK_Tab,		focusprev,	NULL }, \

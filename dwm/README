@@ -1,3 +1,5 @@
+This is a small "fork" that I use myself, mostly changes to config.h.
+
 dwm - dynamic window manager
 ============================
 dwm is an extremely fast, small, and dynamic window manager for X.
