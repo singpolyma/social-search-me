@@ -1,0 +1,6 @@
+#!/bin/sh
+echo Updating MPD...
+mpc update
+sleep 10
+echo Generating Playlists...
+sudo genmpd

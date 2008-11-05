@@ -1,0 +1,3 @@
+#!/bin/sh
+_Q="`echo "$*" | sed "s/ /\+/g"`"
+vlc -f "`curl -s -L "http://yubnub.org/parser/parse?command=dyt+$_Q"`"
