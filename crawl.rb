@@ -10,15 +10,12 @@ db.reconnect = true
 db.real_query("SET NAMES 'UTF8'")
 
 $queue = ['http://singpolyma.net']
-2.times do
-0.upto($queue.length-1) do |i|
-	item = $queue.shift
-	puts "Crawling #{item}..."
-	fetch_store_profile(item, db)
+loop do
+	0.upto($queue.length-1) do |i|
+		item = $queue.shift
+		puts "Crawling #{item}..."
+		fetch_store_profile(item, db)
+	end
 end
-puts $queue.join("\n")
-puts '$$$$'
-end
-
 
 db.close
