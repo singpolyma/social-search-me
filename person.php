@@ -1,5 +1,7 @@
 <?php
 
+require_once 'bad-behavior-generic.php';
+
 header('Content-Type: text/html;charset=utf-8');
 require('db.php');
 
@@ -273,15 +275,17 @@ require('db.php');
 		if($_GET['contacts'] == 'email' && !$url['email']) continue;
 		echo '<li class="vcard">';
 		echo '<a class="url uid" href="'.htmlspecialchars($url['url']).'">';
-		if($url['photo']) echo '<img src="'.htmlspecialchars($url['photo']).'" class="photo" alt="" style="max-width:1.5em;" />';
+		if($url['photo']) echo '<img class="photo" src="'.htmlspecialchars($url['photo']).'" alt="" style="max-width:1.5em;" />';
 		echo '</a> ';
 		echo '<a class="fn url" href="/profile/person.php?id='.htmlspecialchars($url['person_id']).'">'.htmlspecialchars($url['fn']).'</a>';
-		if($_GET['contacts'] == 'email') echo ' (<a href="mailto:'.htmlspecialchars($url['email']).'" class="email">'.htmlspecialchars($url['email']).'</a>)';
+		if($_GET['contacts'] == 'email') echo ' (<a class="email" href="mailto:'.htmlspecialchars($url['email']).'">'.htmlspecialchars($url['email']).'</a>)';
 		echo '</li>';
 	}
 	echo "\t\t</ul>\n</div>";
 
 	endif;//!nocontacts
+		
+	mysql_close($db);
 	
 	?>
 	</body>

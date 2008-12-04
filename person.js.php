@@ -192,5 +192,7 @@ if($_GET['callback'])
 
 	if($_GET['callback'])
 		echo ')';
+		
+		mysql_close($db);
 
 	?>

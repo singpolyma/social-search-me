@@ -62,4 +62,6 @@ echo '}';
 if($_GET['callback'])
 	echo ')';
 		
+mysql_close($db);
+
 ?>

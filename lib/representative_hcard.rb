@@ -9,6 +9,8 @@ def representative_hcard(doc, url)
 	cards = doc.search('.vcard')
 	return cards[0] if cards.size == 1
 
+	address_card = nil
+
 	cards.each do |vcard|
 		uid = vcard.at('.uid')
 		unless uid.nil?
@@ -30,11 +32,11 @@ def representative_hcard(doc, url)
 		end
 		#the following works and is good for Twitter and others, but is not official part of representative hcard
 		if vcard.name == 'address' || vcard.parent.name == 'address'
-			return vcard
+			address_card = vcard
 		end
 	end
 
-	nil
+	address_card
 
 end
 
