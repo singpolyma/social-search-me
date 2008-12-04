@@ -111,7 +111,7 @@ require('db.php');
 	<p id="footer">
 		<?php if($time) echo '<p>'.(microtime(true)-$time).' seconds...</p>'; ?>
 		<a href="http://singpolyma.net/2008/08/diso-gets-search/" rel="about">About / Feedback</a>
-		| <a href="http://svn.devjavu.com/singpolyma/trunk/buddydb/">Source Code</a>
+		| <a href="http://github.com/singpolyma/social-search-me">Source Code</a>
 		| <a href="http://singpolyma.net/2008/08/socialsearchmecom-api/">API</a>
 	</p>
 
