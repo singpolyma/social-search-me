@@ -1,7 +1,0 @@
-<c:url var="urlPrefix" value="/" />
-
-<a href="${content.my.url}"><c:out value="${content.title}" /></a>
-<p><c:out value="${content.my.content}" /></p>
-Added on <fmt:formatDate value="${content.createdDate}"
-    pattern="yyyy-MM-dd"/> by <a href="${urlPrefix}?user=${content.user}"><c:out value="${content.user}"/></a>
-<br />

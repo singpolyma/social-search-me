@@ -1,3 +1,0 @@
-#!/bin/sh
-_Q="`echo "$*" | sed "s/ /\+/g"`"
-yt "`curl -s -L "http://yubnub.org/parser/parse?command=url+ytfl+$_Q"`"

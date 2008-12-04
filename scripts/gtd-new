@@ -1,3 +1,0 @@
-#!/bin/sh
-
-curl -s -L "http://singpolyma:PASSWORD@twitter.com/direct_messages/new.xml" -d"user=rtm&text=$*"

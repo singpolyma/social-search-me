@@ -1,9 +1,0 @@
-#!/usr/bin/ruby
-
-require 'open-uri'
-require 'rexml/document'
-
-doc = REXML::Document.new(open(ARGV[0]).read)
-doc.each_element('//entry/title') do |title|
-    puts title.get_text
-end

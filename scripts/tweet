@@ -1,2 +1,0 @@
-#!/bin/sh
-curl "http://singpolyma:PASSWORD@twitter.com/statuses/update.xml" -d "status=$*"
