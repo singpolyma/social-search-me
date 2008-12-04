@@ -17,6 +17,7 @@ loop do
 		puts "Crawling #{item}..."
 		fetch_store_profile(item, db)
 	end
+	$queue.uniq!
 	fh = File.new(ENV['HOME'] + '/.socialsearchmequeue', 'w')
 	fh.write($queue.join("\n"))
 	fh.close

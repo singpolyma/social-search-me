@@ -5,9 +5,14 @@ require 'uri'
 def get_doc(uri)
 
 	if uri.to_s =~ /facebook\.com\/profile\.php/
-		uri = 'http://www.facebook.com/people/_/' + uri.to_s.scan(/facebook\.com\/profile\.php\?id=(\d+)$/)[0][0]
-		page = `curl -s -L -A"Mozilla/4.0" "#{uri}"`
-		uri = URI.parse(page.scan(/window.location.replace\("([^"]+)"\);/)[0][0].gsub!(/\\\//,'/'))
+		uri = URI.parse('http://www.facebook.com/people/_/' + uri.to_s.scan(/facebook\.com\/profile\.php\?id=(\d+)$/)[0][0])
+		#page = `curl -s -L -A"Mozilla/5.0" "#{uri}"`
+		#begin
+		#	uri = URI.parse(page.scan(/window.location.replace\("([^"]+)"\);/)[0][0].gsub!(/\\\//,'/'))
+		#rescue Exception
+		#	warn 'Facebook fetch failed'
+		#	return nil
+		#end
 	end
 
 	if uri.to_s =~ /explore\.twitter\.com/
