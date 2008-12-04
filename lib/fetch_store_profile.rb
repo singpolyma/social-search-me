@@ -229,7 +229,7 @@ def fetch_store_profile(the_url, db)
 			end
 	end
 
-	if uri.to_s =~ /facebook\.com/
+	if uri.to_s =~ /facebook\.com\/people\/[^\/]\/\d+$/
 		db.real_query("INSERT IGNORE INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote('http://www.facebook.com/profile.php?id=' + uri.to_s.scan(/facebook\.com\/people\/[^\/]+\/(\d+)$/)[0][0])}', #{person_id}, 1)")
 	end
 
