@@ -86,7 +86,7 @@ def fetch_store_profile(the_url, db)
 				begin
 					emails.push email.attributes['href'].scan(/^mailto:(.*)$/)[0][0]
 				rescue Exception
-					fh = File.new(ENV['HOME'] + '/.socialsearchme.log')
+					fh = File.new(ENV['HOME'] + '/.socialsearchme.log', 'a+')
 					fh.puts "Email scan fail: #{email.attributes['href']}"
 					fh.close
 				end
