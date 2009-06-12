@@ -11,7 +11,7 @@ require('db.php');
 	<head>
 		<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
 		<title>socialsearchme.com</title>
-		<link rel="stylesheet" type="text/css" href="main.css" />
+		<link rel="stylesheet" type="text/css" href="/profile/main.css" />
 		<link rel="shortcut icon" href="img/user_green_magnify.png" type="image/png" />
 	</head>
 
