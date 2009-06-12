@@ -11,8 +11,8 @@ require('db.php');
 	<head>
 		<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
 		<title>Search the Social Web!</title>
-		<link rel="stylesheet" type="text/css" href="main.css" />
-		<link rel="shortcut icon" href="img/user_green_magnify.png" type="image/png" />
+		<link rel="stylesheet" type="text/css" href="/profile/main.css" />
+		<link rel="shortcut icon" href="/profile/img/user_green_magnify.png" type="image/png" />
 		<style type="text/css">
 			#profile {
 				float: left;
@@ -65,10 +65,12 @@ require('db.php');
 	} else {
 		require('normalize_url.php');
 		$url = mysql_real_escape_string(normalize_url($_GET['url']),$db);
-		if(!isset($_GET['nofetch'])) shell_exec("ruby fetch_profile.rb \"$url\"");
+		if(!isset($_GET['nofetch'])) shell_exec("ruby fetch_profile.rb '$url' 2>&1");
 		$person_id = @mysql_fetch_assoc(mysql_query("SELECT person_id FROM urls WHERE url='$url'",$db));
 		$person_id = $person_id['person_id'];
 	}//end if id
+
+	if(!$person_id) die('No profile found!');
 
 	if(!isset($_GET['contacts'])) :
 
@@ -210,7 +212,7 @@ require('db.php');
 	if(count($communicate)) {
 		echo "\t\t\t<ul id=\"communicate\">\n";
 		foreach($communicate as $url) {
-			echo "\t\t\t\t<li><img src=\"{$url['logo']}\" alt=\"{$url['org']}:\" /> <a class=\"url\" rel=\"me\" href=\"{$url['url']}\">{$url['fn']}</a></li>";
+			echo "\t\t\t\t<li><img src=\"/profile/{$url['logo']}\" alt=\"{$url['org']}:\" /> <a class=\"url\" rel=\"me\" href=\"{$url['url']}\">{$url['fn']}</a></li>";
 		}//end foreach communicate
 		echo "\t\t\t</ul>\n";
 	}//end if communicate
@@ -245,7 +247,7 @@ require('db.php');
 	if(count($follow)) {
 		echo "<h3>Follow</h3>\t\t\t<ul>\n";
 		foreach($follow as $url) {
-			echo "\t\t\t\t<li><img src=\"{$url['logo']}\" alt=\"{$url['org']}:\" /> <a class=\"url\" rel=\"me\" href=\"{$url['url']}\">{$url['fn']}</a></li>";
+			echo "\t\t\t\t<li><img src=\"/profile/{$url['logo']}\" alt=\"{$url['org']}:\" /> <a class=\"url\" rel=\"me\" href=\"{$url['url']}\">{$url['fn']}</a></li>";
 		}//end foreach follow
 		echo "\t\t\t</ul>\n";
 	}//end if follow
