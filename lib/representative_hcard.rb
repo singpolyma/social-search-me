@@ -6,8 +6,6 @@ def representative_hcard(doc, url)
 	uri = URI.parse(url.strip).normalize
 	url = uri.to_s
 
-	return nil unless doc
-
 	cards = doc.search('.vcard')
 	return cards[0] if cards.size == 1
 

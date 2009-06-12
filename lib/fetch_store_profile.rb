@@ -18,7 +18,7 @@ require File.dirname(__FILE__) + '/hcard_urls'
 def fetch_store_profile(the_url, db)
 
 	uri = URI.parse(the_url).normalize
-	doc, uri = get_doc(uri)
+	doc = get_doc(uri)
 
 	if doc.nil?
 		warn "Fetch error for #{uri.to_s}"
@@ -83,13 +83,7 @@ def fetch_store_profile(the_url, db)
 		end
 		hcard.search('.email') do |email|
 			if email.attributes['href']
-				begin
-					emails.push email.attributes['href'].scan(/^mailto:(.*)$/)[0][0]
-				rescue Exception
-					fh = File.new(ENV['HOME'] + '/.socialsearchme.log', 'a+')
-					fh.puts "Email scan fail: #{email.attributes['href']}"
-					fh.close
-				end
+				emails.push email.attributes['href'].scan(/^mailto:(.*)$/)[0][0]
 			else
 				emails.push email.inner_html.gsub(/<.*?>/,'').strip.gsub(/&amp;/,'&')
 			end
@@ -191,7 +185,7 @@ def fetch_store_profile(the_url, db)
 				res.free
 				if dupe
 					dupe_uri = URI.parse(dupe['url'])
-					dupe_doc, dupe_uri = get_doc(dupe_uri)
+					dupe_doc = get_doc(dupe_uri)
 					dupe_hcard = representative_hcard(dupe_doc, dupe_uri.to_s)
 					dupe_urls = hcard_urls(dupe_hcard, dupe_doc, dupe_uri)[0]
 					iz_dupe = false
