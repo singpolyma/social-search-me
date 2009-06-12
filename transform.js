@@ -35,6 +35,7 @@ function contact_transform(node, data) {
 		node.parentNode.style.marginLeft = '-1em';
 	}
 	node.parentNode.removeChild(node);
+	if(data.photo && !data.photo[0]) data.photo[0] = data.photo[1];
 	if(data.photo && data.photo[0]) {
 		var photo = document.createElement('img');
 		photo.src = data.photo[0];
