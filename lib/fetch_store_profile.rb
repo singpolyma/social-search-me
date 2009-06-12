@@ -18,7 +18,7 @@ require File.dirname(__FILE__) + '/hcard_urls'
 def fetch_store_profile(the_url, db)
 
 	uri = URI.parse(the_url).normalize
-	doc = get_doc(uri)
+	doc, uri = get_doc(uri)
 
 	if doc.nil?
 		warn "Fetch error for #{uri.to_s}"
@@ -185,7 +185,7 @@ def fetch_store_profile(the_url, db)
 				res.free
 				if dupe
 					dupe_uri = URI.parse(dupe['url'])
-					dupe_doc = get_doc(dupe_uri)
+					dupe_doc, dupe_uri = get_doc(dupe_uri)
 					dupe_hcard = representative_hcard(dupe_doc, dupe_uri.to_s)
 					dupe_urls = hcard_urls(dupe_hcard, dupe_doc, dupe_uri)[0]
 					iz_dupe = false
