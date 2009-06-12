@@ -83,7 +83,13 @@ def fetch_store_profile(the_url, db)
 		end
 		hcard.search('.email') do |email|
 			if email.attributes['href']
-				emails.push email.attributes['href'].scan(/^mailto:(.*)$/)[0][0]
+				begin
+					emails.push email.attributes['href'].scan(/^mailto:(.*)$/)[0][0]
+				rescue Exception
+					fh = File.new(ENV['HOME'] + '/.socialsearchme.log', 'a+')
+					fh.puts "Email scan fail: #{email.attributes['href']}"
+					fh.close
+				end
 			else
 				emails.push email.inner_html.gsub(/<.*?>/,'').strip.gsub(/&amp;/,'&')
 			end

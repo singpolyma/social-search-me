@@ -4,7 +4,7 @@ require 'uri'
 
 def get_doc(uri)
 
-	if uri.to_s =~ /facebook\.com\/profile\.php/
+	if uri.to_s =~ /facebook\.com\/profile\.php\?id=\d+$/
 		uri = URI.parse('http://www.facebook.com/people/_/' + uri.to_s.scan(/facebook\.com\/profile\.php\?id=(\d+)$/)[0][0])
 		#page = `curl -s -L -A"Mozilla/5.0" "#{uri}"`
 		#begin
