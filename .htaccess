@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+RewriteBase /profile
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule url/(.+)$ /profile/person.php?url=$1 [L]
+
+RewriteBase /profile
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule (.+)$ /profile/?q=$1 [L]
+</IfModule>
