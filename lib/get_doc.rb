@@ -21,11 +21,42 @@ def get_doc(uri)
 
 	begin
 		#page = open(uri.to_s).read
-		page = `curl -s -L -A"Mozilla/5.0 (SocialWebSearch)" "#{uri.to_s}"`
+		page = `curl -sLiA"Mozilla/5.0 (SocialWebSearch)" "#{uri.to_s}"`
 	rescue Exception
 		return nil
 	end
-	
+
+	headers = []
+	chunkcount = 0
+	page = page.split(/\r\n\r\n/)
+	page.each do |chunk|
+		if chunk =~ /^HTTP/
+			chunkcount += 1
+		else
+			break
+		end
+	end
+	1.upto(chunkcount) do
+		headers << page.shift
+	end
+	page = page.join("\n\n")
+
+	begin
+		final_location = headers.join("\r\n\r\n").scan(/^Location:\s*(.*?)\s*$/i).pop[0].to_s
+		if final_location != ''
+			a_uri = URI.parse(final_location)
+			a_uri.scheme = uri.scheme if a_uri.scheme.nil?
+			if a_uri.scheme =~ /https?|ftp/
+				a_uri.host = uri.host if a_uri.host.nil?
+				a_uri.path = "#{uri.path}#{a_uri.path}" if a_uri.path.nil? || a_uri.path[0..0] != '/'
+			end
+			uri = a_uri
+		end
+	rescue
+	end
+
+	uri.path = '/' if uri.path.to_s == ''
+
 	if page == ''
 		return nil
 	end
@@ -50,6 +81,6 @@ def get_doc(uri)
 		a.set_attribute 'src', a_uri.to_s
 	end
 
-	doc
+	[doc, uri]
 
 end
