@@ -158,7 +158,7 @@ def fetch_store_profile(the_url, db)
 		if url_row.nil?
 			db.real_query("INSERT INTO people (fn, `given-name`, `family-name`, `additional-name`, bday, tz) VALUES ('#{Mysql.quote(fn.to_s)}','#{Mysql.quote(given_name.to_s)}','#{Mysql.quote(family_name.to_s)}','#{Mysql.quote(additional_name.to_s)}',#{bday.to_i},'#{Mysql.quote(tz.to_s)}')")
 			person_id = db.insert_id
-			db.real_query("INSERT INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(uri.to_s)}', #{person_id}, 1)")
+			db.real_query("INSERT INTO urls (url, person_id, verified) VALUES ('#{Mysql.quote(uri.to_s)}', #{person_id.to_i}, 1)")
 		else
 		# This is false data - if we mark it unverified, we may accidentally verify it later... just stop
 		#	person_id = url_row['person_id']
