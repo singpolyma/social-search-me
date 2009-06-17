@@ -152,7 +152,7 @@ def fetch_store_profile(the_url, db)
 	res.free
 
 	if url_row.nil?
-		res = db.query("SELECT * FROM urls WHERE verified=1 AND url IN ('#{urls.join('\',\'')}')")
+		res = db.query("SELECT * FROM urls WHERE verified=1 AND url IN ('#{urls.map{|v| Mysql.quote(v)}.join('\',\'')}')")
 		url_row = res.fetch_hash
 		res.free
 		if url_row.nil?
